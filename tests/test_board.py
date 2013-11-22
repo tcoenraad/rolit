@@ -29,3 +29,8 @@ class TestBoard():
       self.board.place(2, 2, Ball.RED)
 
     self.board.place(2, 3, Ball.RED)
+
+  def test_it_handles_edges_correctly(self):
+    self.board.place(2, 3, Ball.RED)
+    self.board.place(1, 3, Ball.RED)
+    self.board.place(0, 3, Ball.RED)
