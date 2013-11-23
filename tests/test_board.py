@@ -43,6 +43,9 @@ class TestBoard():
     assert self.board.field(5, 2) == Ball(Ball.RED)
     assert self.board.field(4, 3) == Ball(Ball.RED)
 
+    with pytest.raises(RuntimeError):
+      self.board.place(2, 5, Ball.RED)
+
   def test_it_places_fields_diagonally_down(self):
     assert self.board.field(5, 5) == Ball(Ball.EMPTY)
     with pytest.raises(RuntimeError):
@@ -52,6 +55,9 @@ class TestBoard():
 
     assert self.board.field(5, 5) == Ball(Ball.BLUE)
     assert self.board.field(4, 4) == Ball(Ball.BLUE)
+
+    with pytest.raises(RuntimeError):
+      self.board.place(2, 2, Ball.BLUE)
 
   def test_it_takes_no_double_placements(self):
     self.board.place(3, 2, Ball.RED)

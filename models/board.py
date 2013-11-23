@@ -71,6 +71,7 @@ class Board:
       raise RuntimeError('Field is not directly adjacent to any field')
 
     filtered_adjacent_fields = self.filtered_adjacent_fields(x, y, ball)
+
     if len(filtered_adjacent_fields) == 0:
       raise RuntimeError('Field does not have a filtered adjacent field')
 
