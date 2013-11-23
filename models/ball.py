@@ -13,4 +13,7 @@ class Ball:
     self.color = color
 
   def __eq__(self, other):
-    return self.color == other.color
+    return isinstance(other, self.__class__) and self.color == other.color
+
+  def __ne__(self, other):
+    return not self.__eq__(other)

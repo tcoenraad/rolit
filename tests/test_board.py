@@ -73,3 +73,11 @@ class TestBoard():
     self.board.place(6, 2, Ball.GREEN)
 
     assert self.board.field(5, 3) == Ball(Ball.GREEN)
+
+  def test_it_allows_any_move_if_blocking_is_not_forced(self):
+    with pytest.raises(RuntimeError):
+      self.board.place(2, 2, Ball.YELLOW)
+
+    self.board.place(5, 3, Ball.BLUE)
+    self.board.place(2, 2, Ball.YELLOW)
+  
