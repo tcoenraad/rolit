@@ -1,4 +1,4 @@
-from models.Board import Board
+from models.board import Board
 from models.ball import Ball
 
 class Game(object):
