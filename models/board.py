@@ -7,9 +7,13 @@ class Board:
 
   def __init__(self):
     self.board = [[Ball() for col in range(Board.DIM)] for row in range(Board.DIM)]
+    self.board[Board.DIM/2 - 1][Board.DIM/2 - 1] = Ball(Ball.RED)
+    self.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.YELLOW)
+    self.board[Board.DIM/2][Board.DIM/2 - 1]     = Ball(Ball.BLUE)
+    self.board[Board.DIM/2][Board.DIM/2]         = Ball(Ball.GREEN)
 
-  def winning_colors(self):
-    colors = {
+  def stats(self):
+    stats = {
       Ball.RED    : 0,
       Ball.YELLOW : 0,
       Ball.BLUE   : 0,
@@ -19,17 +23,15 @@ class Board:
     for row in self.board:
       for field in row:
         if field == Ball(Ball.RED):
-          colors[Ball.RED] += 1
+          stats[Ball.RED] += 1
         elif field == Ball(Ball.YELLOW):
-          colors[Ball.YELLOW] += 1
+          stats[Ball.YELLOW] += 1
         elif field == Ball(Ball.BLUE):
-          colors[Ball.BLUE] += 1
+          stats[Ball.BLUE] += 1
         elif field == Ball(Ball.GREEN):
-          colors[Ball.GREEN] += 1
+          stats[Ball.GREEN] += 1
 
-    highest = max(colors.values())
-
-    return sorted([color for color, v in colors.items() if v == highest])
+    return stats
 
   def field(self, x, y):
     if x >= Board.DIM or x < 0 or y >= Board.DIM or y < 0:
@@ -49,7 +51,6 @@ class Board:
           continue
         elif len(self.filtered_adjacent_fields(x, y, color)) > 0:
           return True
-
     return False
 
   def filtered_adjacent_fields(self, x, y, color):
@@ -91,7 +92,6 @@ class Board:
             fields.append(field)
 
         filtered_fields += fields
-
     return filtered_fields
 
   def place(self, x, y, color):
