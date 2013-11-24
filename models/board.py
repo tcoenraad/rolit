@@ -9,9 +9,9 @@ class Board:
   def __init__(self):
     self.board = [[Ball() for col in range(Board.DIM)] for row in range(Board.DIM)]
 
-    self.board[Board.DIM/2 - 1][Board.DIM/2 - 1] = Ball(Ball.BLUE)
-    self.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.RED)
-    self.board[Board.DIM/2][Board.DIM/2 - 1]     = Ball(Ball.YELLOW)
+    self.board[Board.DIM/2 - 1][Board.DIM/2 - 1] = Ball(Ball.RED)
+    self.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.YELLOW)
+    self.board[Board.DIM/2][Board.DIM/2 - 1]     = Ball(Ball.BLUE)
     self.board[Board.DIM/2][Board.DIM/2]         = Ball(Ball.GREEN)
 
   def field(self, x, y):
@@ -25,7 +25,7 @@ class Board:
   def direct_adjacent_colors(self, x, y):
     return filter((lambda x: x != Ball(Ball.EMPTY)), self.direct_adjacent_fields(x, y))
 
-  def forced_moves_left(self, color):
+  def any_forced_moves_left(self, color):
     for x in range(Board.DIM):
       for y in range(Board.DIM):
         if len(self.direct_adjacent_colors(x, y)) == 0:
@@ -62,10 +62,9 @@ class Board:
           if not field:
             break
 
-          # stop if field is:
-            # your own color
-            # or empty
-              # and clear the found fields as you did not find your own color
+          # stop walking a direction if field is:
+            # your own color (then return all results till than)
+            # or empty (then clear the found fields as you did not find your own color)
           if field == Ball(color):
             break
           elif field == Ball(Ball.EMPTY):
@@ -80,15 +79,15 @@ class Board:
 
   def place(self, x, y, color):
     if not self.field(x, y) == Ball(Ball.EMPTY):
-      raise RuntimeError('Field is already occupied')
+      raise AlreadyOccupiedError('Field is already occupied')
 
     if len(self.direct_adjacent_colors(x, y)) == 0:
-      raise RuntimeError('Field is not directly adjacent to any field')
+      raise NotAdjacentError('Field is not directly adjacent to any field')
 
     filtered_adjacent_fields = self.filtered_adjacent_fields(x, y, color)
 
-    if len(filtered_adjacent_fields) == 0 and self.forced_moves_left(color):
-      raise RuntimeError('Field does not have a filtered adjacent field')
+    if len(filtered_adjacent_fields) == 0 and self.any_forced_moves_left(color):
+      raise ForcedMoveError('This move is not forced and there are forced moves left')
 
     for field in filtered_adjacent_fields:
       field.recolor(color)
@@ -101,12 +100,12 @@ class Board:
       for x in range(Board.DIM):
         field = self.field(x, y)
         string += ' '
-        if field == Ball(Ball.BLUE):
-          string += colored(Ball.BLUE, 'blue')
-        elif field == Ball(Ball.RED):
+        if field == Ball(Ball.RED):
           string += colored(Ball.RED, 'red')
         elif field == Ball(Ball.YELLOW):
           string += colored(Ball.YELLOW, 'yellow')
+        elif field == Ball(Ball.BLUE):
+          string += colored(Ball.BLUE, 'blue')
         elif field == Ball(Ball.GREEN):
           string += colored(Ball.GREEN, 'green')
         else:
@@ -121,3 +120,9 @@ class Board:
       string += str(col) + ' '
 
     return string
+
+class AlreadyOccupiedError(Exception): pass
+
+class NotAdjacentError(Exception): pass
+
+class ForcedMoveError(Exception): pass

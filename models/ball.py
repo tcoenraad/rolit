@@ -1,9 +1,9 @@
 class Ball:
 
   EMPTY  = 0
-  BLUE   = 1
-  RED    = 2
-  YELLOW = 3
+  RED    = 1
+  YELLOW = 2
+  BLUE   = 3
   GREEN  = 4
 
   def __init__(self, color = EMPTY):
