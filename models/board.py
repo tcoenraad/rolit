@@ -102,13 +102,13 @@ class Board:
       raise NotAdjacentError('Field is not directly adjacent to any field')
 
     filtered_adjacent_fields = self.filtered_adjacent_fields(x, y, color)
-
     if len(filtered_adjacent_fields) == 0 and self.any_forced_moves_left(color):
       raise ForcedMoveError('This move is not forced and there are forced moves left')
 
     for field in filtered_adjacent_fields:
       field.recolor(color)
-    self.board[x][y].recolor(color)
+
+    self.field(x, y).recolor(color)
 
   def __str__(self):
     string = '\n'
