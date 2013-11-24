@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from models.ball import Ball
-from termcolor import colored
 
 class Board:
   DIM = 8
@@ -13,6 +12,29 @@ class Board:
     self.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.YELLOW)
     self.board[Board.DIM/2][Board.DIM/2 - 1]     = Ball(Ball.BLUE)
     self.board[Board.DIM/2][Board.DIM/2]         = Ball(Ball.GREEN)
+
+  def winning_colors(self):
+    colors = {
+      Ball.RED    : 0,
+      Ball.YELLOW : 0,
+      Ball.BLUE   : 0,
+      Ball.GREEN  : 0
+    }
+
+    for row in self.board:
+      for field in row:
+        if field == Ball(Ball.RED):
+          colors[Ball.RED] += 1
+        elif field == Ball(Ball.YELLOW):
+          colors[Ball.YELLOW] += 1
+        elif field == Ball(Ball.BLUE):
+          colors[Ball.BLUE] += 1
+        elif field == Ball(Ball.GREEN):
+          colors[Ball.GREEN] += 1
+
+    highest = max(colors.values())
+
+    return sorted([color for color, v in colors.items() if v == highest])
 
   def field(self, x, y):
     if x >= Board.DIM or x < 0 or y >= Board.DIM or y < 0:
@@ -100,16 +122,7 @@ class Board:
       for x in range(Board.DIM):
         field = self.field(x, y)
         string += ' '
-        if field == Ball(Ball.RED):
-          string += colored(Ball.RED, 'red')
-        elif field == Ball(Ball.YELLOW):
-          string += colored(Ball.YELLOW, 'yellow')
-        elif field == Ball(Ball.BLUE):
-          string += colored(Ball.BLUE, 'blue')
-        elif field == Ball(Ball.GREEN):
-          string += colored(Ball.GREEN, 'green')
-        else:
-          string += str(Ball.EMPTY)
+        string += str(field)
       string += '\n' # one new line per column
 
     string += '   '

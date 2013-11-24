@@ -19,7 +19,6 @@ class TestBoard():
       self.board.place(3, 2, Ball.RED)
 
     self.board.place(3, 2, Ball.YELLOW)
-
     assert self.board.field(3, 2) == Ball(Ball.YELLOW)
     assert self.board.field(3, 3) == Ball(Ball.YELLOW)
 
@@ -29,7 +28,6 @@ class TestBoard():
       self.board.place(5, 4, Ball.RED)
 
     self.board.place(5, 4, Ball.YELLOW)
-
     assert self.board.field(5, 4) == Ball(Ball.YELLOW)
     assert self.board.field(4, 4) == Ball(Ball.YELLOW)
   
@@ -39,7 +37,6 @@ class TestBoard():
       self.board.place(5, 2, Ball.RED)
 
     self.board.place(5, 2, Ball.YELLOW)
-
     assert self.board.field(5, 2) == Ball(Ball.YELLOW)
     assert self.board.field(4, 3) == Ball(Ball.YELLOW)
 
@@ -52,7 +49,6 @@ class TestBoard():
       self.board.place(5, 5, Ball.YELLOW)
     
     self.board.place(5, 5, Ball.RED)
-
     assert self.board.field(5, 5) == Ball(Ball.RED)
     assert self.board.field(4, 4) == Ball(Ball.RED)
 
@@ -82,3 +78,12 @@ class TestBoard():
     self.board.place(5, 3, Ball.RED)
     self.board.place(2, 2, Ball.BLUE)
   
+  def test_it_gives_the_right_winning_colors(self):
+    assert self.board.winning_colors() == [Ball.RED, Ball.YELLOW, Ball.BLUE, Ball.GREEN]
+
+    self.board.place(5, 5, Ball.RED)
+    assert self.board.winning_colors() == [Ball.RED]
+
+    print self.board
+    self.board.place(5, 23, Ball.YELLOW)
+    assert self.board.winning_colors() == [Ball.RED, Ball.YELLOW]

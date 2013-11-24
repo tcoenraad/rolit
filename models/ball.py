@@ -1,3 +1,5 @@
+from termcolor import colored
+
 class Ball:
 
   EMPTY  = 0
@@ -17,3 +19,15 @@ class Ball:
 
   def __ne__(self, other):
     return not self.__eq__(other)
+
+  def __str__(self):
+    if self == Ball(Ball.RED):
+      return colored(Ball.RED, 'red')
+    elif self == Ball(Ball.YELLOW):
+      return colored(Ball.YELLOW, 'yellow')
+    elif self == Ball(Ball.BLUE):
+      return colored(Ball.BLUE, 'blue')
+    elif self == Ball(Ball.GREEN):
+      return colored(Ball.GREEN, 'green')
+    else:
+      return str(Ball.EMPTY)
