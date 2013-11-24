@@ -6,6 +6,10 @@ import pytest
 class TestBoard():
   def setup_method(self, method):
     self.board = Board()
+    self.board.board[Board.DIM/2 - 1][Board.DIM/2 - 1] = Ball(Ball.RED)
+    self.board.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.YELLOW)
+    self.board.board[Board.DIM/2][Board.DIM/2 - 1]     = Ball(Ball.BLUE)
+    self.board.board[Board.DIM/2][Board.DIM/2]         = Ball(Ball.GREEN)
 
   def test_it_setups(self):
     assert self.board.field(3, 3) == Ball(Ball.RED)
@@ -84,6 +88,5 @@ class TestBoard():
     self.board.place(5, 5, Ball.RED)
     assert self.board.winning_colors() == [Ball.RED]
 
-    print self.board
-    self.board.place(5, 23, Ball.YELLOW)
+    self.board.place(5, 2, Ball.YELLOW)
     assert self.board.winning_colors() == [Ball.RED, Ball.YELLOW]
