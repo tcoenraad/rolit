@@ -22,7 +22,7 @@ class Game(object):
     return [player for (player, color) in self.players().items() if stats[color] == player_max]
 
   def place(self, x, y, color):
-    if color != self.players()[self.current_player] and color not in self.free_colors():
+    if color != self.players()[self.current_player]:
       raise NotAllowedColorError('This is not your color, pal!')
 
     self.board.place(x, y, color)

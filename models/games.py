@@ -13,9 +13,6 @@ class TwoPlayerGame(Game):
       1 : Ball.YELLOW
     }
 
-  def free_colors(self):
-    return [Ball.BLUE, Ball.GREEN]
-
 class ThreePlayerGame(Game):
 
   def __init__(self):
@@ -28,9 +25,6 @@ class ThreePlayerGame(Game):
       1 : Ball.YELLOW,
       2 : Ball.BLUE
     }
-
-  def free_colors(self):
-    return [Ball.GREEN]
 
 class FourPlayerGame(Game):
 
@@ -46,6 +40,3 @@ class FourPlayerGame(Game):
       2 : Ball.BLUE,
       3 : Ball.GREEN
     }
-
-  def free_colors(self):
-    return []
