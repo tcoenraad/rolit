@@ -32,10 +32,10 @@ class Server:
     elif len(clients) == 4:
       game = FourPlayerGame()
 
-    random.shuffle(clients)
-
     game_id = id(game)
     self.games[game_id] = { 'clients' : clients, 'game' : game }
+
+    random.shuffle(clients)
     for client in clients:
       client['game_id'] = game_id
       client['socket'].send("%s %s" % (Protocol.START, ' '.join(str(c) for c in clients)))

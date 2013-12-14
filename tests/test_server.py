@@ -53,14 +53,15 @@ class TestServer():
 
   def test_two_player_game(self):
     game = TwoPlayerGame()
+    game_id = id(game)
     game.balls_left = 1
 
-    game_id = id(game)
-    clients = [self.clients[0], self.clients[1]]
-    for client in clients:
+    game_clients = [self.clients[0], self.clients[1]]
+    self.server.games[game_id] = {'game' : game, 'clients' : game_clients}
+
+    for client in game_clients:
       client['game_id'] = game_id
 
-    self.server.games[game_id] = {'game' : game, 'clients' : clients}
     self.server.place(self.clients[0], 5, 3, Protocol.RED)
 
     self.clients[0]['socket'].send.assert_called_once_with("%s %s" % (Protocol.GAME_OVER, self.clients[0]['name']))
