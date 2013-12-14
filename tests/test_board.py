@@ -4,6 +4,7 @@ from models.ball import Ball
 import pytest
 
 class TestBoard():
+
   def setup_method(self, method):
     self.board = Board()
 

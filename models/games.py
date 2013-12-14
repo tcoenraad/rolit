@@ -10,7 +10,7 @@ class TwoPlayerGame(Game):
   def players(self):
     return {
       0 : Ball.RED,
-      1 : Ball.YELLOW
+      1 : Ball.GREEN
     }
 
 class ThreePlayerGame(Game):
@@ -23,7 +23,7 @@ class ThreePlayerGame(Game):
     return {
       0 : Ball.RED,
       1 : Ball.YELLOW,
-      2 : Ball.BLUE
+      2 : Ball.GREEN
     }
 
 class FourPlayerGame(Game):
