@@ -7,7 +7,7 @@ from models.game import *
 class Server:
   def __init__(self):
     self.clients = []
-    self.games = {}
+    self.network_games = {}
     self.join_list = { 2 : [], 3 : [], 4 : [] }
     self.challenge_list = {}
 
@@ -23,6 +23,8 @@ class Server:
     return False
 
   def disconnect(self, client):
+    if 'game_id' in client:
+      self.game_over(self.network_games[client['game_id']])
     self.clients.remove(client)
 
   def join(self, client, number_of_players):
@@ -46,7 +48,7 @@ class Server:
       game = FourPlayerGame()
 
     game_id = id(game)
-    self.games[game_id] = { 'clients' : clients, 'game' : game }
+    self.network_games[game_id] = { 'clients' : clients, 'game' : game }
 
     for client in clients:
       client['game_id'] = game_id
@@ -63,20 +65,23 @@ class Server:
     if 'game_id' not in client:
       raise UserError("Client is not in-game")
 
-    game = self.games[client['game_id']]
-    if game['game'].current_player != game['clients'].index(client):
+    network_game = self.network_games[client['game_id']]
+    if network_game['game'].current_player != network_game['clients'].index(client):
       raise UserError("Client is not current player of game")
 
-    for client in game['clients']:
+    for client in network_game['clients']:
       client['socket'].send("%s %s %s" % (Protocol.PLACE, color, coord))
 
     try:
-      game['game'].place(x, y, Protocol.COLORS[color])
-      game['clients'][game['game'].current_player]['socket'].send(Protocol.PLAY)
+      network_game['game'].place(x, y, Protocol.COLORS[color])
+      network_game['clients'][network_game['game'].current_player]['socket'].send(Protocol.PLAY)
     except GameOverError:
-      for client in game['clients']:
-        client['socket'].send("%s %s" % (Protocol.GAME_OVER, ' '.join(game['clients'][p]['name'] for p in game['game'].winning_players())))
-        del(client['game_id'])
+      self.game_over(network_game)
+
+  def game_over(self, network_game):
+    for client in network_game['clients']:
+      client['socket'].send("%s %s" % (Protocol.GAME_OVER, ' '.join(network_game['clients'][p]['name'] for p in network_game['game'].winning_players())))
+      del(client['game_id'])
 
 class ServerError(Exception): pass
 class UserError(Exception): pass

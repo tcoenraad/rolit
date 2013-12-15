@@ -25,6 +25,13 @@ class TestServer():
     self.server.disconnect(self.clients[0])
     self.server.connect(Mock(), "Bestuur 35!")
 
+  def test_it_game_overs_a_game_on_disconnect(self):
+    self.server.start_game([self.clients[0], self.clients[1]])
+    self.server.disconnect(self.clients[1])
+
+    args = "%s %s %s" % (Protocol.GAME_OVER, self.clients[0]['name'], self.clients[1]['name'])
+    self.clients[0]['socket'].send.assert_has_calls(call(args))
+
   def test_it_validates_requested_number_of_player(self):
     with pytest.raises(UserError):
       self.server.join(self.clients[0], 1)
@@ -81,8 +88,8 @@ class TestServer():
 
   def test_it_starts_for_two_players(self):
     self.server.start_game([self.clients[0], self.clients[1]])
-    args = "%s %s %s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'])
 
+    args = "%s %s %s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'])
     self.clients[0]['socket'].send.assert_has_calls(call(args))
     self.clients[0]['socket'].send.assert_has_calls(call("%s" % (Protocol.PLAY)))
     self.clients[1]['socket'].send.assert_called_once_with(args)
@@ -90,8 +97,8 @@ class TestServer():
 
   def test_it_starts_for_three_players(self):
     self.server.start_game([self.clients[0], self.clients[1], self.clients[2]])
+    
     args = "%s %s %s %s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'])
-
     self.clients[0]['socket'].send.assert_has_calls(call(args))
     self.clients[0]['socket'].send.assert_has_calls(call("%s" % (Protocol.PLAY)))
     self.clients[1]['socket'].send.assert_called_once_with(args)
@@ -100,8 +107,8 @@ class TestServer():
   
   def test_it_starts_for_four_players(self):
     self.server.start_game([self.clients[0], self.clients[1], self.clients[2], self.clients[3]])
-    args = "%s %s %s %s %s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], self.clients[3]['name'])
 
+    args = "%s %s %s %s %s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], self.clients[3]['name'])
     self.clients[0]['socket'].send.assert_has_calls(call(args))
     self.clients[0]['socket'].send.assert_has_calls(call("%s" % (Protocol.PLAY)))
     self.clients[1]['socket'].send.assert_called_once_with(args)
