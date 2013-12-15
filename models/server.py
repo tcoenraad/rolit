@@ -59,15 +59,24 @@ class Server:
     return game
 
   def place(self, client, coord, color):
+    if not coord[0].isdigit() or not coord[1].isdigit():
+      raise UserError("Given coordinate is not an integer, refer to protocol")
+
+    if color not in Protocol.COLORS:
+      raise UserError("Given color is not valid, refer to protocol")
+
     x = int(coord[0])
     y = int(coord[1])
 
+    if x < 0 or x >= Board.DIM or y < 0 or y >= Board.DIM:
+      raise UserError("Given coordinate does not exist on board, refer to protocol")
+
     if 'game_id' not in client:
-      raise UserError("Client is not in-game")
+      raise UserError("Client is not in-game, refer to protocol")
 
     network_game = self.network_games[client['game_id']]
     if network_game['game'].current_player != network_game['clients'].index(client):
-      raise UserError("Client is not current player of game")
+      raise UserError("Client is not current player of game, refer to protocol")
 
     for client in network_game['clients']:
       client['socket'].send("%s %s %s" % (Protocol.PLACE, color, coord))

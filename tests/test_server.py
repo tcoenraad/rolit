@@ -25,18 +25,23 @@ class TestServer():
     self.server.disconnect(self.clients[0])
     self.server.connect(Mock(), "Bestuur 35!")
 
-  def test_it_game_overs_a_game_on_disconnect(self):
-    self.server.start_game([self.clients[0], self.clients[1]])
-    self.server.disconnect(self.clients[1])
-
-    args = "%s %s %s" % (Protocol.GAME_OVER, self.clients[0]['name'], self.clients[1]['name'])
-    self.clients[0]['socket'].send.assert_has_calls(call(args))
-
   def test_it_validates_requested_number_of_player(self):
     with pytest.raises(UserError):
       self.server.join(self.clients[0], 1)
     with pytest.raises(UserError):
       self.server.join(self.clients[0], 5)
+
+  def test_it_validates_dimension_of_board(self):
+    self.server.start_game([self.clients[0], self.clients[1]])
+    with pytest.raises(UserError):
+      self.server.place(self.clients[0], '-1', Protocol.RED)
+    with pytest.raises(UserError):
+      self.server.place(self.clients[0], '88', Protocol.RED)
+
+  def test_it_validates_colors_on_placement(self):
+    self.server.start_game([self.clients[0], self.clients[1]])
+    with pytest.raises(UserError):
+      self.server.place(self.clients[0], '53', 'Inter-/Actief/-blauw')
 
   def test_it_validates_client_is_in_game(self):
     with pytest.raises(UserError):
@@ -53,6 +58,13 @@ class TestServer():
     self.server.start_game([self.clients[0], self.clients[1], self.clients[2]])
     with pytest.raises(UserError):
       self.server.place(self.clients[1], '52', Protocol.YELLOW)
+
+  def test_game_goes_game_overs_on_disconnect(self):
+    self.server.start_game([self.clients[0], self.clients[1]])
+    self.server.disconnect(self.clients[1])
+
+    args = "%s %s %s" % (Protocol.GAME_OVER, self.clients[0]['name'], self.clients[1]['name'])
+    self.clients[0]['socket'].send.assert_has_calls(call(args))
 
   def test_it_joins_for_two_players(self):
     self.server.start_game = Mock()

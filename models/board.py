@@ -96,7 +96,7 @@ class Board:
 
   def place(self, x, y, color):
     if not self.field(x, y) == Ball(Ball.EMPTY):
-      raise AlreadyOccupiedError('Field is already occupied')
+      raise AlreadyOccupiedError('Field is already occupied or not on this board')
 
     if len(self.direct_adjacent_colors(x, y)) == 0:
       raise NotAdjacentError('Field is not directly adjacent to any field')
