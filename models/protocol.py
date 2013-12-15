@@ -5,6 +5,7 @@ class Protocol:
   JOIN       = 'join'
   START      = 'start'
   PLAY       = 'play'
+  PLACE      = 'place'
   GAME_OVER  = 'gameover'
 
   RED        = 'red'
