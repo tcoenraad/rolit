@@ -23,7 +23,7 @@ class Game(object):
 
   def place(self, x, y, color):
     if color != self.players()[self.current_player]:
-      raise NotAllowedColorError('This is not your color, pal!')
+      raise NotAllowedColorError('Given color does not belong to the current player')
 
     self.board.place(x, y, color)
     self.current_player = (self.current_player + 1) % self.player_amount

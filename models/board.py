@@ -103,7 +103,7 @@ class Board:
 
     filtered_adjacent_fields = self.filtered_adjacent_fields(x, y, color)
     if len(filtered_adjacent_fields) == 0 and self.any_forced_moves_left(color):
-      raise ForcedMoveError('This move is not forced and there are forced moves left')
+      raise ForcedMoveError('This move is not forced, while forced moves are left')
 
     for field in filtered_adjacent_fields:
       field.recolor(color)

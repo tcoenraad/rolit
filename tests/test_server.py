@@ -1,5 +1,4 @@
 import pytest
-import mock
 from mock import Mock, call
 
 from models.server import *
@@ -17,30 +16,35 @@ class TestServer():
     self.clients.append({ 'socket' : Mock(), 'name' : "Met TOM op de koffie!"} )
 
     for client in self.clients:
-      client['socket'].send = Mock()
+      self.server.connect(client['socket'], client['name'])
 
-    self.server.clients = self.clients
+  def test_it_validates_name_is_unique(self):
+    with pytest.raises(ServerError):
+      self.server.connect(Mock(), "Bestuur 35!")
+
+    self.server.disconnect(self.clients[0])
+    self.server.connect(Mock(), "Bestuur 35!")
 
   def test_it_validates_requested_number_of_player(self):
-    with pytest.raises(InputError):
+    with pytest.raises(UserError):
       self.server.join(self.clients[0], 1)
-    with pytest.raises(InputError):
+    with pytest.raises(UserError):
       self.server.join(self.clients[0], 5)
 
   def test_it_validates_client_is_in_game(self):
-    with pytest.raises(InputError):
+    with pytest.raises(UserError):
       self.server.place(self.clients[0], '53', Protocol.RED)
 
     game = self.server.start_game([self.clients[0], self.clients[1]])
     game.balls_left = 1
 
     self.server.place(self.clients[0], '53', Protocol.RED)
-    with pytest.raises(InputError):
+    with pytest.raises(UserError):
       self.server.place(self.clients[0], '53', Protocol.RED)
 
   def test_it_validates_it_is_clients_turn(self):
     self.server.start_game([self.clients[0], self.clients[1], self.clients[2]])
-    with pytest.raises(InputError):
+    with pytest.raises(UserError):
       self.server.place(self.clients[1], '52', Protocol.YELLOW)
 
   def test_it_joins_for_two_players(self):

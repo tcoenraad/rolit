@@ -12,11 +12,22 @@ class Server:
     self.challenge_list = {}
 
   def connect(self, client, name):
-    self.clients.append({ 'client' : client, 'name' : name})
+    if self.get_client(name):
+      raise ServerError("Given name is already in use")
+    self.clients.append({ 'socket' : client, 'name' : name})
+
+  def get_client(self, name):
+    for client in self.clients:
+      if client['name'] == name:
+        return client
+    return False
+
+  def disconnect(self, client):
+    self.clients.remove(client)
 
   def join(self, client, number_of_players):
     if number_of_players < 2 or number_of_players > 4:
-      raise InputError("A game is played with 2 to 4 players")
+      raise UserError("A game is played with 2 to 4 players")
 
     clients = self.join_list[number_of_players]
     clients.append(client)
@@ -50,11 +61,11 @@ class Server:
     y = int(coord[1])
 
     if 'game_id' not in client:
-      raise InputError("Client is not in-game")
+      raise UserError("Client is not in-game")
 
     game = self.games[client['game_id']]
     if game['game'].current_player != game['clients'].index(client):
-      raise InputError("It is not the turn for this client")
+      raise UserError("Client is not current player of game")
 
     for client in game['clients']:
       client['socket'].send("%s %s %s" % (Protocol.PLACE, color, coord))
@@ -67,4 +78,5 @@ class Server:
         client['socket'].send("%s %s" % (Protocol.GAME_OVER, ' '.join(game['clients'][p]['name'] for p in game['game'].winning_players())))
         del(client['game_id'])
 
-class InputError(Exception): pass
+class ServerError(Exception): pass
+class UserError(Exception): pass
