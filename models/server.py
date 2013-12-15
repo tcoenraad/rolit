@@ -14,17 +14,17 @@ class Server:
   def connect(self, client, name):
     self.clients.append({ 'client' : client, 'name' : name})
 
-  def join(self, client, amount_of_players):
-    if amount_of_players < 2 or amount_of_players > 4:
+  def join(self, client, number_of_players):
+    if number_of_players < 2 or number_of_players > 4:
       raise InputError("A game is played with 2 to 4 players")
 
-    clients = self.join_list[amount_of_players]
+    clients = self.join_list[number_of_players]
     clients.append(client)
 
-    if len(clients) == amount_of_players:
+    if len(clients) == number_of_players:
       random.shuffle(clients)
       self.start_game(clients)
-      self.join_list[amount_of_players] = []
+      self.join_list[number_of_players] = []
 
   def start_game(self, clients):
     if len(clients) == 2:
@@ -43,22 +43,28 @@ class Server:
 
     clients[0]['socket'].send(Protocol.PLAY)
 
+    return game
+
   def place(self, client, coord, color):
     x = int(coord[0])
     y = int(coord[1])
-    game = self.games[client['game_id']]
 
+    if 'game_id' not in client:
+      raise InputError("Client is not in-game")
+
+    game = self.games[client['game_id']]
     if game['game'].current_player != game['clients'].index(client):
-      raise InputError("It is not the turn for this player")
+      raise InputError("It is not the turn for this client")
 
     for client in game['clients']:
       client['socket'].send("%s %s %s" % (Protocol.PLACE, color, coord))
 
     try:
       game['game'].place(x, y, Protocol.COLORS[color])
+      game['clients'][game['game'].current_player]['socket'].send(Protocol.PLAY)
     except GameOverError:
       for client in game['clients']:
         client['socket'].send("%s %s" % (Protocol.GAME_OVER, ' '.join(game['clients'][p]['name'] for p in game['game'].winning_players())))
-        client['game_id'] = None
+        del(client['game_id'])
 
 class InputError(Exception): pass
