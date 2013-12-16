@@ -1,29 +1,30 @@
 import pytest
-from mock import Mock, call
+from mock import Mock, call, patch
 
 from models.server import *
 
+@patch.object(random, 'shuffle', Mock())
 class TestServer():
 
   def setup_method(self, method):
     self.server = Server()
 
     self.clients = []
-    self.clients.append({ 'socket' : Mock(), 'name' : "Bestuur 35!"} )
+    self.clients.append({ 'socket' : Mock(), 'name' : "Met TOM op de koffie!"} )
     self.clients.append({ 'socket' : Mock(), 'name' : "Yorinf"} )
     self.clients.append({ 'socket' : Mock(), 'name' : "Tegel 14"} )
     self.clients.append({ 'socket' : Mock(), 'name' : "Lalala geld"} )
-    self.clients.append({ 'socket' : Mock(), 'name' : "Met TOM op de koffie!"} )
+    self.clients.append({ 'socket' : Mock(), 'name' : "IEOEDMB"} )
 
     for client in self.clients:
       self.server.connect(client['socket'], client['name'])
 
   def test_it_validates_name_is_unique(self):
     with pytest.raises(ServerError):
-      self.server.connect(Mock(), "Bestuur 35!")
+      self.server.connect(Mock(), "Met TOM op de koffie!")
 
     self.server.disconnect(self.clients[0])
-    self.server.connect(Mock(), "Bestuur 35!")
+    self.server.connect(Mock(), "Met TOM op de koffie!")
 
   def test_it_validates_requested_number_of_player(self):
     with pytest.raises(UserError):
@@ -72,10 +73,10 @@ class TestServer():
     self.server.join(self.clients[0], 2)
     self.server.join(self.clients[1], 2)
     self.server.join(self.clients[2], 2)
-    assert sorted(self.server.start_game.call_args[0][0]) == sorted([self.clients[0], self.clients[1]])
+    self.server.start_game.assert_called_with([self.clients[0], self.clients[1]])
 
     self.server.join(self.clients[3], 2)
-    assert sorted(self.server.start_game.call_args[0][0]) == sorted([self.clients[2], self.clients[3]])
+    self.server.start_game.assert_called_with([self.clients[2], self.clients[3]])
 
   def test_it_joins_for_three_players(self):
     self.server.start_game = Mock()
@@ -85,7 +86,7 @@ class TestServer():
     self.server.join(self.clients[2], 3)
     self.server.join(self.clients[3], 3)
 
-    assert sorted(self.server.start_game.call_args[0][0]) == sorted([self.clients[0], self.clients[1], self.clients[2]])
+    self.server.start_game.assert_called_once_with([self.clients[0], self.clients[1], self.clients[2]])
 
   def test_it_joins_for_four_players(self):
     self.server.start_game = Mock()
@@ -96,7 +97,7 @@ class TestServer():
     self.server.join(self.clients[3], 4)
     self.server.join(self.clients[4], 4)
 
-    assert sorted(self.server.start_game.call_args[0][0]) == sorted([self.clients[0], self.clients[1], self.clients[2], self.clients[3]])
+    self.server.start_game.assert_called_once_with([self.clients[0], self.clients[1], self.clients[2], self.clients[3]])
 
   def test_it_starts_for_two_players(self):
     self.server.start_game([self.clients[0], self.clients[1]])
