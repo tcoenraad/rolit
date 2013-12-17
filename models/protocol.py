@@ -2,6 +2,7 @@ from models.ball import Ball
 
 class Protocol:
   
+  GREET      = 'greet'
   JOIN       = 'join'
   START      = 'start'
   PLAY       = 'play'
@@ -12,6 +13,8 @@ class Protocol:
   YELLOW     = 'yellow'
   BLUE       = 'blue'
   GREEN      = 'green'
+
+  SEPARATOR  = ' '
 
   COLORS  = {
     RED    : Ball.RED,

@@ -26,6 +26,15 @@ class TestServer():
     self.server.disconnect(self.clients[0])
     self.server.connect(Mock(), "Met TOM op de koffie!")
 
+  def test_it_overwrite_joins(self):
+    self.server.start_game = Mock()
+
+    self.server.join(self.clients[0], 2)
+    self.server.join(self.clients[0], 2)
+    self.server.join(self.clients[1], 2)
+
+    self.server.start_game.assert_called_once_with([self.clients[0], self.clients[1]])
+
   def test_it_validates_requested_number_of_player(self):
     with pytest.raises(UserError):
       self.server.join(self.clients[0], 1)

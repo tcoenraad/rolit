@@ -11,10 +11,13 @@ class Server:
     self.join_list = { 2 : [], 3 : [], 4 : [] }
     self.challenge_list = {}
 
-  def connect(self, client, name):
+  def connect(self, socket, name):
     if self.get_client(name):
       raise ServerError("Given name is already in use")
-    self.clients.append({ 'socket' : client, 'name' : name})
+
+    client = { 'socket' : socket, 'name' : name}
+    self.clients.append(client)
+    return client
 
   def get_client(self, name):
     for client in self.clients:
@@ -30,6 +33,10 @@ class Server:
   def join(self, client, number_of_players):
     if number_of_players < 2 or number_of_players > 4:
       raise UserError("A game is played with 2 to 4 players")
+
+    for clients in self.join_list.values():
+      if client in clients:
+        clients.remove(client)
 
     clients = self.join_list[number_of_players]
     clients.append(client)
