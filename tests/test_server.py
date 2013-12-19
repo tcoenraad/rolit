@@ -19,13 +19,6 @@ class TestServer():
     for client in self.clients:
       self.server.connect(client['socket'], client['name'])
 
-  def test_it_validates_name_is_unique(self):
-    with pytest.raises(ServerError):
-      self.server.connect(Mock(), "Met TOM op de koffie!")
-
-    self.server.disconnect(self.clients[0])
-    self.server.connect(Mock(), "Met TOM op de koffie!")
-
   def test_it_overwrite_joins(self):
     self.server.start_game = Mock()
 
@@ -35,11 +28,22 @@ class TestServer():
 
     self.server.start_game.assert_called_once_with([self.clients[0], self.clients[1]])
 
+  def test_it_validates_name_is_unique(self):
+    with pytest.raises(ServerError):
+      self.server.connect(Mock(), "Met TOM op de koffie!")
+
+    self.server.disconnect(self.clients[0])
+    self.server.connect(Mock(), "Met TOM op de koffie!")
+
   def test_it_validates_requested_number_of_player(self):
     with pytest.raises(ClientError):
       self.server.join(self.clients[0], '1')
     with pytest.raises(ClientError):
       self.server.join(self.clients[0], '5')
+
+  def test_it_validates_number_is_a_number(self):
+    with pytest.raises(ClientError):
+      self.server.join(self.clients[0], 'vijfendertig')
 
   def test_it_validates_dimension_of_board(self):
     self.server.start_game([self.clients[0], self.clients[1]])
