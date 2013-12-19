@@ -2,7 +2,7 @@
 
 from models.ball import Ball
 
-class Board:
+class Board(object):
   DIM = 8
 
   def __init__(self):
