@@ -15,7 +15,7 @@ class Protocol(object):
   GREEN      = 'green'
 
   SEPARATOR  = ' '
-  EOL  = "\r\n"
+  EOL        = "\r\n"
 
   COLORS  = {
     RED    : Ball.RED,

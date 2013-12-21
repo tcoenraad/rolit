@@ -71,16 +71,16 @@ class Server(object):
 
   def place(self, client, coord, color):
     if color not in Protocol.COLORS:
-      raise ClientError("Given color is not valid, refer to protocol")
+      raise ClientError("Given color `%s` is not valid, refer to protocol" % color)
 
     if not coord[0].isdigit() or not coord[1].isdigit():
-      raise ClientError("Given coordinate is not an integer, refer to protocol")
+      raise ClientError("Given coordinate `%s` is not an integer, refer to protocol" % coord)
 
     x = int(coord[0])
     y = int(coord[1])
 
     if x < 0 or x >= Board.DIM or y < 0 or y >= Board.DIM:
-      raise ClientError("Given coordinate does not exist on board, refer to protocol")
+      raise ClientError("Given coordinate `%s` does not exist on board, refer to protocol" % coord)
 
     if 'game_id' not in client:
       raise ClientError("Client is not in-game, refer to protocol")
