@@ -26,9 +26,10 @@ class Server(object):
     return False
 
   def disconnect(self, client):
+    self.clients.remove(client)
+
     if 'game_id' in client:
       self.game_over(self.network_games[client['game_id']])
-    self.clients.remove(client)
 
   def join(self, client, number_of_players):
     if not number_of_players.isdigit():
@@ -100,8 +101,9 @@ class Server(object):
 
   def game_over(self, network_game):
     for client in network_game['clients']:
-      client['socket'].send("%s %s%s" % (Protocol.GAME_OVER, ' '.join(network_game['clients'][p]['name'] for p in network_game['game'].winning_players()), Protocol.EOL))
-      del(client['game_id'])
+      if client in self.clients:
+        client['socket'].send("%s %s%s" % (Protocol.GAME_OVER, ' '.join(network_game['clients'][p]['name'] for p in network_game['game'].winning_players()), Protocol.EOL))
+        del(client['game_id'])
 
 class ServerError(Exception): pass
 class ClientError(Exception): pass
