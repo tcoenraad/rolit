@@ -9,15 +9,15 @@ class TestServer():
   def setup_method(self, method):
     self.server = Server()
 
-    self.clients = []
-    self.clients.append({ 'socket' : Mock(), 'name' : "Met TOM op de koffie!"} )
-    self.clients.append({ 'socket' : Mock(), 'name' : "Yorinf"} )
-    self.clients.append({ 'socket' : Mock(), 'name' : "Tegel 14"} )
-    self.clients.append({ 'socket' : Mock(), 'name' : "Lalala geld"} )
-    self.clients.append({ 'socket' : Mock(), 'name' : "IEOEDMB"} )
+    self.mocked_clients = [{ 'socket' : Mock(), 'name' : "Met TOM op de koffie!"},
+                           { 'socket' : Mock(), 'name' : "Yorinf"},
+                           { 'socket' : Mock(), 'name' : "Tegel 14"},
+                           { 'socket' : Mock(), 'name' : "Lalala geld"},
+                           { 'socket' : Mock(), 'name' : "IEOEDMB"}]
 
-    for client in self.clients:
-      self.server.connect(client['socket'], client['name'])
+    self.clients = []
+    for client in self.mocked_clients:
+      self.clients.append(self.server.connect(client['socket'], client['name']))
 
   def test_it_overwrite_joins(self):
     self.server.start_game = Mock()
