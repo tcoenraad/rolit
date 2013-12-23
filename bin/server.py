@@ -39,9 +39,9 @@ class ClientHandler(threading.Thread):
           break
 
         if data[0] == Protocol.JOIN and len(data) == 2:
-          server.join(client, data[1])
+          server.join(self.client, data[1])
         elif data[0] == Protocol.PLACE and len(data) == 3:
-          server.place(client, data[1], data[2])
+          server.place(self.client, data[1], data[2])
         else:
           raise ClientError('Invalid command `%s`, refer to protocol' % data)
     except ServerError as e:
