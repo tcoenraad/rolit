@@ -27,14 +27,14 @@ class Leaderboard(object):
   def best_score_of_date(self, date):
     scores = [score for score in self.scores if score.date == date]
 
-    if len(self.scores) == 0:
+    if len(scores) == 0:
       raise NoHighScoresError("No high scores on this date")
     return max(scores, key = lambda x: x.score)
 
   def best_score_of_player(self, name):
     scores = [score for score in self.scores if score.name == name]
 
-    if len(self.scores) == 0:
+    if len(scores) == 0:
       raise NoHighScoresError("No high scores for this player")
     return max(scores, key = lambda x: x.score)
 
