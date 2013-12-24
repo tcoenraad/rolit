@@ -42,6 +42,8 @@ class ClientHandler(threading.Thread):
           server.join(self.client, data[1])
         elif data[0] == Protocol.PLACE and len(data) == 3:
           server.place(self.client, data[1], data[2])
+        elif data[0] == Protocol.STAT_REQUEST and len(data) == 3:
+          server.stats(self.client, data[1], data[2])
         else:
           raise ClientError('Invalid command `%s`, refer to protocol' % data)
     except ServerError as e:

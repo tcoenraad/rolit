@@ -216,10 +216,12 @@ class TestServer():
     self.server.place(self.clients[0], '53', Protocol.RED)
     self.server.game_over(self.server.network_games[id(game)])
 
-    self.server.stats(self.clients[0], Protocol.STAT_DATE, time.time())
+    self.server.stats(self.clients[0], Protocol.STAT_DATE, str(time.time()))
+    self.server.stats(self.clients[0], Protocol.STAT_DATE, str(time.mktime(datetime.datetime(2013, 9, 3).timetuple())))
 
-    args = "%s %s %s%s" % (Protocol.STAT, self.clients[0]['name'], '1', Protocol.EOL)
-    self.clients[0]['socket'].send.assert_has_calls(call(args))
+    args = [call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_DATE, time.time(), '1', Protocol.EOL)),
+            call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_DATE, time.mktime(datetime.datetime(2013, 9, 3).timetuple()), Protocol.UNDEFINED, Protocol.EOL))]
+    self.clients[0]['socket'].send.assert_has_calls(args)
 
   def test_it_gives_the_right_player_stats(self):
     game = self.server.start_game([self.clients[0], self.clients[1]])
@@ -228,7 +230,9 @@ class TestServer():
 
     self.server.stats(self.clients[0], Protocol.STAT_PLAYER, self.clients[0]['name'])
     self.server.stats(self.clients[0], Protocol.STAT_PLAYER, self.clients[1]['name'])
+    self.server.stats(self.clients[0], Protocol.STAT_PLAYER, self.clients[2]['name'])
 
-    args = [call("%s %s %s%s" % (Protocol.STAT, self.clients[0]['name'], '1', Protocol.EOL)),
-            call("%s %s %s%s" % (Protocol.STAT, self.clients[1]['name'], '0', Protocol.EOL))]
+    args = [call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_PLAYER, self.clients[0]['name'], '1', Protocol.EOL)),
+            call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_PLAYER, self.clients[1]['name'], '0', Protocol.EOL)),
+            call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_PLAYER, self.clients[2]['name'], Protocol.UNDEFINED, Protocol.EOL))]
     self.clients[0]['socket'].send.assert_has_calls(args)

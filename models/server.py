@@ -3,7 +3,7 @@ import random, datetime
 from models.games import *
 from models.game import *
 from models.protocol import Protocol
-from models.leaderboard import Leaderboard
+from models.leaderboard import *
 
 class Server(object):
   def __init__(self):
@@ -116,14 +116,22 @@ class Server(object):
         del(client['game_id'])
 
   def stats(self, client, stat, arg):
-    if stat == Protocol.STAT_DATE:
-      score = self.leaderboard.best_score_of_date(datetime.datetime.fromtimestamp(arg))
-      client['socket'].send("%s %s %s%s" % (Protocol.STAT, score.name, score.score, Protocol.EOL))
-    elif stat == Protocol.STAT_PLAYER:
-      score = self.leaderboard.best_score_of_player(arg)
-      client['socket'].send("%s %s %s%s" % (Protocol.STAT, score.name, score.score, Protocol.EOL))
-    else:
-      raise ClientError("Given stat `%s` is not recognized, refer to protocol" % stat)
+    try:
+      if stat == Protocol.STAT_DATE:
+        try:
+          arg = float(arg)
+        except ValueError:
+          raise ClientError("Given argument `%s` is not a floating point" % arg)
+
+        score = self.leaderboard.best_score_of_date(datetime.datetime.fromtimestamp(arg))
+        client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, score.score, Protocol.EOL))
+      elif stat == Protocol.STAT_PLAYER:
+        score = self.leaderboard.best_score_of_player(arg)
+        client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, score.score, Protocol.EOL))
+      else:
+        raise ClientError("Given stat `%s` is not recognized, refer to protocol" % stat)
+    except NoHighScoresError:
+      client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, Protocol.UNDEFINED, Protocol.EOL))
 
 class ServerError(Exception): pass
 class ClientError(Exception): pass
