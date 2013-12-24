@@ -64,7 +64,7 @@ port = 3535
 if len(sys.argv) >= 2 and sys.argv[1].isdigit():
   port = int(sys.argv[1])
 
-sock.bind(('localhost', port))
+sock.bind(('0.0.0.0', port))
 sock.listen(1)
 
 server = Server()
