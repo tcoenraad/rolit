@@ -25,7 +25,7 @@ class Leaderboard(object):
     return dict((player, score) for player, score in scores_per_player.iteritems() if score == max_score)
 
   def best_score_of_date(self, date):
-    scores = [score for score in self.scores if score.date == date]
+    scores = [score for score in self.scores if score.date.date() == date.date()]
 
     if len(scores) == 0:
       raise NoHighScoresError("No high scores on this date")
