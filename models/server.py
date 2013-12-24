@@ -1,11 +1,13 @@
-import random
+import random, datetime
 
 from models.games import *
-from models.protocol import Protocol
 from models.game import *
+from models.protocol import Protocol
+from models.leaderboard import Leaderboard
 
 class Server(object):
   def __init__(self):
+    self.leaderboard = Leaderboard()
     self.clients = []
     self.network_games = {}
     self.join_list = { 2 : [], 3 : [], 4 : [] }
@@ -102,8 +104,26 @@ class Server(object):
   def game_over(self, network_game):
     for client in network_game['clients']:
       if client in self.clients:
-        client['socket'].send("%s %s%s" % (Protocol.GAME_OVER, ' '.join(network_game['clients'][p]['name'] for p in network_game['game'].winning_players()), Protocol.EOL))
+        winning_players = network_game['game'].winning_players()
+        winning_clients = [network_game['clients'][p] for p in winning_players]
+
+        client['socket'].send("%s %s%s" % (Protocol.GAME_OVER, ' '.join(client['name'] for client in winning_clients), Protocol.EOL))
+
+        if client in winning_clients:
+          self.leaderboard.add_score(client['name'], datetime.datetime.now(), 1)
+        else:
+          self.leaderboard.add_score(client['name'], datetime.datetime.now(), 0)
         del(client['game_id'])
+
+  def stats(self, client, stat, arg):
+    if stat == Protocol.STAT_DATE:
+      score = self.leaderboard.best_score_of_date(datetime.datetime.fromtimestamp(arg))
+      client['socket'].send("%s %s %s%s" % (Protocol.STAT, score.name, score.score, Protocol.EOL))
+    elif stat == Protocol.STAT_PLAYER:
+      score = self.leaderboard.best_score_of_player(arg)
+      client['socket'].send("%s %s %s%s" % (Protocol.STAT, score.name, score.score, Protocol.EOL))
+    else:
+      raise ClientError("Given stat `%s` is not recognized, refer to protocol" % stat)
 
 class ServerError(Exception): pass
 class ClientError(Exception): pass
