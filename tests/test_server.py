@@ -164,11 +164,11 @@ class TestServer():
     game.balls_left = 2
 
     self.server.place(self.clients[0], '53', Protocol.RED)
-    self.server.place(self.clients[1], '52', Protocol.YELLOW)
+    self.server.place(self.clients[1], '52', Protocol.BLUE)
 
     args = [call("%s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], Protocol.EOL)),
       call("%s %s %s%s" % (Protocol.PLACE, Protocol.RED, '53', Protocol.EOL)),
-      call("%s %s %s%s" % (Protocol.PLACE, Protocol.YELLOW, '52', Protocol.EOL)),
+      call("%s %s %s%s" % (Protocol.PLACE, Protocol.BLUE, '52', Protocol.EOL)),
       call("%s %s%s" % (Protocol.GAME_OVER, self.clients[1]['name'], Protocol.EOL))]
     
     args.insert(1, call("%s%s" % (Protocol.PLAY, Protocol.EOL)))
@@ -187,14 +187,14 @@ class TestServer():
     game.balls_left = 3
 
     self.server.place(self.clients[0], '53', Protocol.RED)
-    self.server.place(self.clients[1], '52', Protocol.YELLOW)
-    self.server.place(self.clients[2], '54', Protocol.BLUE)
+    self.server.place(self.clients[1], '52', Protocol.BLUE)
+    self.server.place(self.clients[2], '24', Protocol.GREEN)
 
     args = [call("%s %s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], self.clients[3]['name'], Protocol.EOL)),
       call("%s %s %s%s" % (Protocol.PLACE, Protocol.RED, '53', Protocol.EOL)),
-      call("%s %s %s%s" % (Protocol.PLACE, Protocol.YELLOW, '52', Protocol.EOL)),
-      call("%s %s %s%s" % (Protocol.PLACE, Protocol.BLUE, '54', Protocol.EOL)),
-      call("%s %s%s" % (Protocol.GAME_OVER, self.clients[1]['name'], Protocol.EOL))]
+      call("%s %s %s%s" % (Protocol.PLACE, Protocol.BLUE, '52', Protocol.EOL)),
+      call("%s %s %s%s" % (Protocol.PLACE, Protocol.GREEN, '24', Protocol.EOL)),
+      call("%s %s%s" % (Protocol.GAME_OVER, self.clients[2]['name'], Protocol.EOL))]
 
     args.insert(1, call("%s%s" % (Protocol.PLAY, Protocol.EOL)))
     self.clients[0]['socket'].send.assert_has_calls(args)

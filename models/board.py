@@ -8,15 +8,15 @@ class Board(object):
     def __init__(self):
         self.board = [[Ball() for col in range(Board.DIM)] for row in range(Board.DIM)]
         self.board[Board.DIM/2 - 1][Board.DIM/2 - 1] = Ball(Ball.RED)
-        self.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.YELLOW)
-        self.board[Board.DIM/2][Board.DIM/2 - 1]     = Ball(Ball.BLUE)
+        self.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.BLUE)
+        self.board[Board.DIM/2][Board.DIM/2 - 1]     = Ball(Ball.YELLOW)
         self.board[Board.DIM/2][Board.DIM/2]         = Ball(Ball.GREEN)
 
     def stats(self):
         stats = {
             Ball.RED    : 0,
-            Ball.YELLOW : 0,
             Ball.BLUE   : 0,
+            Ball.YELLOW : 0,
             Ball.GREEN  : 0
         }
 
@@ -24,10 +24,10 @@ class Board(object):
             for field in row:
                 if field == Ball(Ball.RED):
                     stats[Ball.RED] += 1
-                elif field == Ball(Ball.YELLOW):
-                    stats[Ball.YELLOW] += 1
                 elif field == Ball(Ball.BLUE):
                     stats[Ball.BLUE] += 1
+                elif field == Ball(Ball.YELLOW):
+                    stats[Ball.YELLOW] += 1
                 elif field == Ball(Ball.GREEN):
                     stats[Ball.GREEN] += 1
 
