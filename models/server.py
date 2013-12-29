@@ -13,7 +13,7 @@ class Server(object):
         self.join_list = { 2 : [], 3 : [], 4 : [] }
         self.challenge_list = {}
 
-    def connect(self, socket, name, chat = '0', challenge = '0'):
+    def connect(self, socket, name, chat = Protocol.FALSE, challenge = Protocol.FALSE):
         if self.get_client(name):
             raise ServerError("Given name is already in use")
 
@@ -22,7 +22,7 @@ class Server(object):
                    'chat' : chat == Protocol.TRUE,
                    'challenge': challenge == Protocol.TRUE }
         self.clients.append(client)
-        client['socket'].send("%s %s %s%s" % (Protocol.GREET, '1', '1', Protocol.EOL))
+        client['socket'].send("%s %s %s%s" % (Protocol.GREET, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
 
         return client
 
