@@ -13,12 +13,17 @@ class Server(object):
         self.join_list = { 2 : [], 3 : [], 4 : [] }
         self.challenge_list = {}
 
-    def connect(self, socket, name):
+    def connect(self, socket, name, chat = '0', challenge = '0'):
         if self.get_client(name):
             raise ServerError("Given name is already in use")
 
-        client = { 'socket' : socket, 'name' : name}
+        client = { 'socket' : socket,
+                   'name' : name,
+                   'chat' : chat == Protocol.TRUE,
+                   'challenge': challenge == Protocol.TRUE }
         self.clients.append(client)
+        client['socket'].send("%s %s %s%s" % (Protocol.GREET, '1', '1', Protocol.EOL))
+
         return client
 
     def get_client(self, name):
@@ -33,10 +38,24 @@ class Server(object):
         if 'game_id' in client:
             self.game_over(self.network_games[client['game_id']])
 
+    def chat(self, sender, message):
+        if not sender['chat']:
+            raise ClientError("You said you did not support chat, so you cannot send a chat message")
+
+        if 'game_id' in sender:
+            clients = self.network_games[sender['game_id']]['clients']
+        else:
+            clients = [client for client in self.clients if 'game_id' not in client]
+        chat_clients = [client for client in clients if client['chat']]
+
+        for chat_client in chat_clients:
+            chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], message, Protocol.EOL))
+
     def join(self, client, number_of_players):
-        if not number_of_players.isdigit():
+        try:
+            number_of_players = int(number_of_players)
+        except ValueError:
             raise ClientError("Given number is not a number")
-        number_of_players = int(number_of_players)
 
         if number_of_players < 2 or number_of_players > 4:
             raise ClientError("A game is played with 2 to 4 players")

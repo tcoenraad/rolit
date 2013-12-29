@@ -8,6 +8,7 @@ class Protocol(object):
     PLAY         = 'play'
     PLACE        = 'place'
     GAME_OVER    = 'game_over'
+    CHAT         = 'chat'
 
     RED          = 'red'
     YELLOW       = 'yellow'
@@ -21,6 +22,8 @@ class Protocol(object):
 
     SEPARATOR    = ' '
     EOL          = "\r\n"
+    TRUE         = '1'
+    FALSE        = '0'
     UNDEFINED    = '-1'
 
     COLORS  = {

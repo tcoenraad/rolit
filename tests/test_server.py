@@ -9,15 +9,21 @@ class TestServer():
   def setup_method(self, method):
     self.server = Server()
 
-    self.mocked_clients = [{ 'socket' : Mock(), 'name' : "Met TOM op de koffie!"},
-                           { 'socket' : Mock(), 'name' : "Yorinf"},
-                           { 'socket' : Mock(), 'name' : "Tegel 14"},
-                           { 'socket' : Mock(), 'name' : "Lalala geld"},
-                           { 'socket' : Mock(), 'name' : "IEOEDMB"}]
+    self.mocked_clients = [{ 'socket' : Mock(), 'name' : "Met_TOM_op_de_koffie!", 'chat' : Protocol.TRUE,  'challenge' : Protocol.TRUE },
+                           { 'socket' : Mock(), 'name' : "Yorinf",                'chat' : Protocol.TRUE,  'challenge' : Protocol.TRUE },
+                           { 'socket' : Mock(), 'name' : "Tegel_14",              'chat' : Protocol.TRUE,  'challenge' : Protocol.FALSE },
+                           { 'socket' : Mock(), 'name' : "Lalala_geld",           'chat' : Protocol.FALSE, 'challenge' : Protocol.FALSE },
+                           { 'socket' : Mock(), 'name' : "IEOEDMB",               'chat' : Protocol.FALSE, 'challenge' : Protocol.FALSE }]
 
     self.clients = []
     for client in self.mocked_clients:
-      self.clients.append(self.server.connect(client['socket'], client['name']))
+      self.clients.append(self.server.connect(client['socket'], client['name'], client['chat'], client['challenge']))
+
+  def test_it_connects(self):
+    socket = Mock()
+    self.server.connect(socket, "Bestuur_35", Protocol.TRUE, Protocol.FALSE)
+
+    socket.send.assert_called_once_with("%s %s %s%s" % (Protocol.GREET, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
 
   def test_it_overwrite_joins(self):
     self.server.start_game = Mock()
@@ -30,10 +36,10 @@ class TestServer():
 
   def test_it_validates_name_is_unique(self):
     with pytest.raises(ServerError):
-      self.server.connect(Mock(), "Met TOM op de koffie!")
+      self.server.connect(Mock(), "Met_TOM_op_de_koffie!")
 
     self.server.disconnect(self.clients[0])
-    self.server.connect(Mock(), "Met TOM op de koffie!")
+    self.server.connect(Mock(), "Met_TOM_op_de_koffie!")
 
   def test_it_validates_requested_number_of_player(self):
     with pytest.raises(ClientError):
@@ -52,7 +58,7 @@ class TestServer():
     with pytest.raises(ClientError):
       self.server.place(self.clients[0], '88', Protocol.RED)
 
-  def test_it_validates_colors_on_placement(self):
+  def test_it_validates_colors_are_colors(self):
     self.server.start_game([self.clients[0], self.clients[1]])
     with pytest.raises(ClientError):
       self.server.place(self.clients[0], '53', 'Inter-/Actief/-blauw')
@@ -79,6 +85,34 @@ class TestServer():
 
     args = "%s %s %s%s" % (Protocol.GAME_OVER, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL)
     self.clients[0]['socket'].send.assert_has_calls(call(args))
+
+  def test_chat_when_enabled_and_in_lobby(self):
+    self.server.chat(self.clients[0], "This is a test message")
+
+    args = call("%s %s %s%s" % (Protocol.CHAT, self.clients[0]['name'], "This is a test message", Protocol.EOL))
+    self.clients[0]['socket'].send.assert_has_calls(args)
+    self.clients[1]['socket'].send.assert_has_calls(args)
+    self.clients[2]['socket'].send.assert_has_calls(args)
+    assert self.clients[3]['socket'].send.call_count == 1
+    assert self.clients[4]['socket'].send.call_count == 1
+
+  def test_chat_when_enabled_and_in_game(self):
+    self.server.start_game([self.clients[0], self.clients[1]])
+    self.server.chat(self.clients[0], "This is a test message")
+    self.server.chat(self.clients[2], "This is a second test message")
+
+    args = call("%s %s %s%s" % (Protocol.CHAT, self.clients[0]['name'], "This is a test message", Protocol.EOL))
+    self.clients[0]['socket'].send.assert_has_calls(args)
+    self.clients[1]['socket'].send.assert_has_calls(args)
+
+    args = call("%s %s %s%s" % (Protocol.CHAT, self.clients[2]['name'], "This is a second test message", Protocol.EOL))
+    self.clients[2]['socket'].send.assert_has_calls(args)
+    assert self.clients[3]['socket'].send.call_count == 1
+    assert self.clients[4]['socket'].send.call_count == 1
+
+  def test_chat_when_disabled(self):
+    with pytest.raises(ClientError):
+      self.server.chat(self.clients[3], "This is a test message")
 
   def test_it_joins_for_two_players(self):
     self.server.start_game = Mock()
@@ -115,32 +149,32 @@ class TestServer():
   def test_it_starts_for_two_players(self):
     self.server.start_game([self.clients[0], self.clients[1]])
 
-    args = "%s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL)
-    self.clients[0]['socket'].send.assert_has_calls(call(args))
+    args = call("%s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL))
+    self.clients[0]['socket'].send.assert_has_calls(args)
     self.clients[0]['socket'].send.assert_has_calls(call("%s%s" % (Protocol.PLAY, Protocol.EOL)))
-    self.clients[1]['socket'].send.assert_called_once_with(args)
-    assert self.clients[2]['socket'].send.call_count == 0
+    self.clients[1]['socket'].send.assert_has_calls(args)
+    assert self.clients[2]['socket'].send.call_count == 1
 
   def test_it_starts_for_three_players(self):
     self.server.start_game([self.clients[0], self.clients[1], self.clients[2]])
     
-    args = "%s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], Protocol.EOL)
-    self.clients[0]['socket'].send.assert_has_calls(call(args))
+    args = call("%s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], Protocol.EOL))
+    self.clients[0]['socket'].send.assert_has_calls(args)
     self.clients[0]['socket'].send.assert_has_calls(call("%s%s" % (Protocol.PLAY, Protocol.EOL)))
-    self.clients[1]['socket'].send.assert_called_once_with(args)
-    self.clients[2]['socket'].send.assert_called_once_with(args)
-    assert self.clients[3]['socket'].send.call_count == 0
+    self.clients[1]['socket'].send.assert_has_calls(args)
+    self.clients[2]['socket'].send.assert_has_calls(args)
+    assert self.clients[3]['socket'].send.call_count == 1
   
   def test_it_starts_for_four_players(self):
     self.server.start_game([self.clients[0], self.clients[1], self.clients[2], self.clients[3]])
 
-    args = "%s %s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], self.clients[3]['name'], Protocol.EOL)
-    self.clients[0]['socket'].send.assert_has_calls(call(args))
+    args = call("%s %s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], self.clients[3]['name'], Protocol.EOL))
+    self.clients[0]['socket'].send.assert_has_calls(args)
     self.clients[0]['socket'].send.assert_has_calls(call("%s%s" % (Protocol.PLAY, Protocol.EOL)))
-    self.clients[1]['socket'].send.assert_called_once_with(args)
-    self.clients[2]['socket'].send.assert_called_once_with(args)
-    self.clients[3]['socket'].send.assert_called_once_with(args)
-    assert self.clients[4]['socket'].send.call_count == 0
+    self.clients[1]['socket'].send.assert_has_calls(args)
+    self.clients[2]['socket'].send.assert_has_calls(args)
+    self.clients[3]['socket'].send.assert_has_calls(args)
+    assert self.clients[4]['socket'].send.call_count == 1
 
   def test_it_places_for_two_players(self):
     game = self.server.start_game([self.clients[0], self.clients[1]])
@@ -157,7 +191,7 @@ class TestServer():
 
     args.pop(1)
     self.clients[1]['socket'].send.assert_has_calls(args)
-    assert self.clients[2]['socket'].send.call_count == 0
+    assert self.clients[2]['socket'].send.call_count == 1
 
   def test_it_places_for_three_players(self):
     game = self.server.start_game([self.clients[0], self.clients[1], self.clients[2]])
@@ -180,7 +214,7 @@ class TestServer():
 
     args.pop(2)
     self.clients[2]['socket'].send.assert_has_calls(args)
-    assert self.clients[3]['socket'].send.call_count == 0
+    assert self.clients[3]['socket'].send.call_count == 1
 
   def test_it_places_for_four_players(self):
     game = self.server.start_game([self.clients[0], self.clients[1], self.clients[2], self.clients[3]])
@@ -209,7 +243,7 @@ class TestServer():
 
     args.pop(3)
     self.clients[3]['socket'].send.assert_has_calls(args)
-    assert self.clients[4]['socket'].send.call_count == 0
+    assert self.clients[4]['socket'].send.call_count == 1
 
   def test_it_gives_the_right_date_stats(self):
     game = self.server.start_game([self.clients[0], self.clients[1]])
