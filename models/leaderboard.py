@@ -11,8 +11,7 @@ class Leaderboard(object):
 
         scores_per_player = {}
         for score in self.scores:
-            if score.name not in scores_per_player:
-                scores_per_player[score.name] = 0
+            scores_per_player.setdefault(score.name, 0)
             scores_per_player[score.name] += score.score
         return scores_per_player
 
