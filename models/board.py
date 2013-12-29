@@ -120,10 +120,10 @@ class Board(object):
                 string += str(field)
             string += '\n' # one new line per column
 
-        string += '     '
+        string += '   '
         for col in range(Board.DIM):
             string += '– '
-        string += '\n     '
+        string += '\n   '
         for col in range(Board.DIM):
             string += str(col) + ' '
 
