@@ -2,6 +2,7 @@ Rolit
 =====
 
 [![Build Status](https://travis-ci.org/tcoenraad/rolit.png?branch=master)](https://travis-ci.org/tcoenraad/rolit)
+[![Code Health](https://landscape.io/github/tcoenraad/rolit/master/landscape.png)](https://landscape.io/github/tcoenraad/rolit/master)
 
 a Rolit server for softwaresystemen - Python edition
 

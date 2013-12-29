@@ -1,3 +1,4 @@
 termcolor
 pytest
+pytest-xdist
 mock
