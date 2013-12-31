@@ -5,76 +5,76 @@ import pytest
 
 class TestBoard():
 
-  def setup_method(self, method):
-    self.board = Board()
+    def setup_method(self, method):
+        self.board = Board()
 
-  def test_it_setups(self):
-    assert self.board.field(3, 3) == Ball(Ball.RED)
-    assert self.board.field(3, 4) == Ball(Ball.BLUE)
-    assert self.board.field(4, 3) == Ball(Ball.YELLOW)
-    assert self.board.field(4, 4) == Ball(Ball.GREEN)
+    def test_it_setups(self):
+        assert self.board.field(3, 3) == Ball(Ball.RED)
+        assert self.board.field(3, 4) == Ball(Ball.BLUE)
+        assert self.board.field(4, 3) == Ball(Ball.YELLOW)
+        assert self.board.field(4, 4) == Ball(Ball.GREEN)
 
-  def test_it_places_fields_vertically(self):
-    assert self.board.field(3, 2) == Ball(Ball.EMPTY)
-    with pytest.raises(ForcedMoveError):
-      self.board.place(3, 2, Ball.RED)
+    def test_it_places_fields_vertically(self):
+        assert self.board.field(3, 2) == Ball(Ball.EMPTY)
+        with pytest.raises(ForcedMoveError):
+            self.board.place(3, 2, Ball.RED)
 
-    self.board.place(3, 2, Ball.BLUE)
-    assert self.board.field(3, 2) == Ball(Ball.BLUE)
-    assert self.board.field(3, 3) == Ball(Ball.BLUE)
+        self.board.place(3, 2, Ball.BLUE)
+        assert self.board.field(3, 2) == Ball(Ball.BLUE)
+        assert self.board.field(3, 3) == Ball(Ball.BLUE)
 
-  def test_it_places_fields_horizontally(self):
-    assert self.board.field(5, 4) == Ball(Ball.EMPTY)
-    with pytest.raises(ForcedMoveError):
-      self.board.place(5, 4, Ball.RED)
+    def test_it_places_fields_horizontally(self):
+        assert self.board.field(5, 4) == Ball(Ball.EMPTY)
+        with pytest.raises(ForcedMoveError):
+            self.board.place(5, 4, Ball.RED)
 
-    self.board.place(5, 4, Ball.BLUE)
-    assert self.board.field(5, 4) == Ball(Ball.BLUE)
-    assert self.board.field(4, 4) == Ball(Ball.BLUE)
-  
-  def test_it_places_fields_diagonally_up(self):
-    assert self.board.field(5, 2) == Ball(Ball.EMPTY)
-    with pytest.raises(ForcedMoveError):
-      self.board.place(5, 2, Ball.RED)
-
-    self.board.place(5, 2, Ball.BLUE)
-    assert self.board.field(5, 2) == Ball(Ball.BLUE)
-    assert self.board.field(4, 3) == Ball(Ball.BLUE)
-
-    with pytest.raises(ForcedMoveError):
-      self.board.place(2, 5, Ball.BLUE)
-
-  def test_it_places_fields_diagonally_down(self):
-    assert self.board.field(5, 5) == Ball(Ball.EMPTY)
-    with pytest.raises(ForcedMoveError):
-      self.board.place(5, 5, Ball.BLUE)
+        self.board.place(5, 4, Ball.BLUE)
+        assert self.board.field(5, 4) == Ball(Ball.BLUE)
+        assert self.board.field(4, 4) == Ball(Ball.BLUE)
     
-    self.board.place(5, 5, Ball.RED)
-    assert self.board.field(5, 5) == Ball(Ball.RED)
-    assert self.board.field(4, 4) == Ball(Ball.RED)
+    def test_it_places_fields_diagonally_up(self):
+        assert self.board.field(5, 2) == Ball(Ball.EMPTY)
+        with pytest.raises(ForcedMoveError):
+            self.board.place(5, 2, Ball.RED)
 
-    with pytest.raises(ForcedMoveError):
-      self.board.place(2, 2, Ball.RED)
+        self.board.place(5, 2, Ball.BLUE)
+        assert self.board.field(5, 2) == Ball(Ball.BLUE)
+        assert self.board.field(4, 3) == Ball(Ball.BLUE)
 
-  def test_it_takes_no_double_placements(self):
-    self.board.place(3, 2, Ball.BLUE)
+        with pytest.raises(ForcedMoveError):
+            self.board.place(2, 5, Ball.BLUE)
 
-    with pytest.raises(AlreadyOccupiedError):
-      self.board.place(3, 2, Ball.BLUE)
+    def test_it_places_fields_diagonally_down(self):
+        assert self.board.field(5, 5) == Ball(Ball.EMPTY)
+        with pytest.raises(ForcedMoveError):
+            self.board.place(5, 5, Ball.BLUE)
+        
+        self.board.place(5, 5, Ball.RED)
+        assert self.board.field(5, 5) == Ball(Ball.RED)
+        assert self.board.field(4, 4) == Ball(Ball.RED)
 
-  def test_it_only_allows_adjacent_placements(self):
-    with pytest.raises(NotAdjacentError):
-      self.board.place(6, 2, Ball.GREEN)
+        with pytest.raises(ForcedMoveError):
+            self.board.place(2, 2, Ball.RED)
 
-    self.board.place(5, 3, Ball.RED)
-    self.board.place(6, 2, Ball.GREEN)
+    def test_it_takes_no_double_placements(self):
+        self.board.place(3, 2, Ball.BLUE)
 
-    assert self.board.field(6, 2) == Ball(Ball.GREEN)
-    assert self.board.field(5, 3) == Ball(Ball.GREEN)
+        with pytest.raises(AlreadyOccupiedError):
+            self.board.place(3, 2, Ball.BLUE)
 
-  def test_it_allows_any_move_if_blocking_is_not_forced(self):
-    with pytest.raises(ForcedMoveError):
-      self.board.place(2, 2, Ball.YELLOW)
+    def test_it_only_allows_adjacent_placements(self):
+        with pytest.raises(NotAdjacentError):
+            self.board.place(6, 2, Ball.GREEN)
 
-    self.board.place(5, 3, Ball.RED)
-    self.board.place(2, 2, Ball.YELLOW)
+        self.board.place(5, 3, Ball.RED)
+        self.board.place(6, 2, Ball.GREEN)
+
+        assert self.board.field(6, 2) == Ball(Ball.GREEN)
+        assert self.board.field(5, 3) == Ball(Ball.GREEN)
+
+    def test_it_allows_any_move_if_blocking_is_not_forced(self):
+        with pytest.raises(ForcedMoveError):
+            self.board.place(2, 2, Ball.YELLOW)
+
+        self.board.place(5, 3, Ball.RED)
+        self.board.place(2, 2, Ball.YELLOW)
