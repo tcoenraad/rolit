@@ -1,5 +1,8 @@
 from termcolor import colored
 
+from models.protocol import Protocol
+from models.protocol_extended import ProtocolExtended
+
 class Ball(object):
 
     EMPTY  = 0
@@ -13,6 +16,31 @@ class Ball(object):
 
     def recolor(self, color):
         self.color = color
+
+    def encode(self):
+        if self == Ball(Ball.RED):
+            return Protocol.RED
+        elif self == Ball(Ball.BLUE):
+            return Protocol.BLUE
+        elif self == Ball(Ball.YELLOW):
+            return Protocol.YELLOW
+        elif self == Ball(Ball.GREEN):
+            return Protocol.GREEN
+        else:
+            return ProtocolExtended.EMPTY
+
+    @staticmethod
+    def decode(color):
+        if color == Protocol.RED:
+            return Ball(Ball.RED)
+        elif color == Protocol.BLUE:
+            return Ball(Ball.BLUE)
+        elif color == Protocol.YELLOW:
+            return Ball(Ball.YELLOW)
+        elif color == Protocol.GREEN:
+            return Ball(Ball.GREEN)
+        else:
+            return Ball(Ball.EMPTY)
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.color == other.color

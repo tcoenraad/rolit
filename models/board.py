@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from models.ball import Ball
+from models.protocol import Protocol
 
 class Board(object):
     DIM = 8
@@ -109,6 +110,26 @@ class Board(object):
             field.recolor(color)
 
         self.field(x, y).recolor(color)
+
+    def encode(self):
+        string = ""
+        for y in range(Board.DIM):
+            for x in range(Board.DIM):
+                field = self.field(x, y)
+                string += Protocol.SEPARATOR
+                string += field.encode()
+
+        return string.strip()
+
+    @staticmethod
+    def decode(board_string):
+        board_fields = board_string.split(Protocol.SEPARATOR)
+        board = Board()
+ 
+        for y in range(Board.DIM):
+            for x in range(Board.DIM):
+                board.board[x][y] = Ball.decode(board_fields[y * Board.DIM + x])
+        return board
 
     def __str__(self):
         string = '\n'

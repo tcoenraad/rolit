@@ -78,3 +78,14 @@ class TestBoard():
 
         self.board.place(5, 3, Ball.RED)
         self.board.place(2, 2, Ball.YELLOW)
+
+    def test_it_encodes(self):
+        assert self.board.encode() == "empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty red yellow empty empty empty empty empty empty blue green empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty"
+
+    def test_it_decode(self):
+        board = Board.decode("empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty red yellow empty empty empty empty empty empty blue green empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty")
+        assert board.field(3, 3) == Ball(Ball.RED)
+        assert board.field(3, 4) == Ball(Ball.BLUE)
+        assert board.field(4, 3) == Ball(Ball.YELLOW)
+        assert board.field(4, 4) == Ball(Ball.GREEN)
+
