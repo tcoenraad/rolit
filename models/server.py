@@ -96,7 +96,7 @@ class Server(object):
 
     def remove_challenge(self, challenger):
         for challengee in self.challenge_list[challenger]:
-           self.get_client(challengee)['socket'].send("%s%s" % (Protocol.CHALLENGE_REJECTED, Protocol.EOL))
+            self.get_client(challengee)['socket'].send("%s%s" % (Protocol.CHALLENGE_REJECTED, Protocol.EOL))
         del(self.challenge_list[challenger])
 
     def join(self, client, number_of_players):
