@@ -1,5 +1,3 @@
-from models.ball import Ball
-
 class Protocol(object):
     
     GREET              = 'greet'
@@ -28,10 +26,3 @@ class Protocol(object):
     TRUE         = '1'
     FALSE        = '0'
     UNDEFINED    = '-1'
-
-    COLORS  = {
-    RED    : Ball.RED,
-    YELLOW : Ball.YELLOW,
-    BLUE   : Ball.BLUE,
-    GREEN  : Ball.GREEN
-    }

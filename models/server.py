@@ -5,6 +5,13 @@ from models.game import *
 from models.protocol import Protocol
 from models.leaderboard import *
 
+COLORS  = {
+    Protocol.RED    : Ball.RED,
+    Protocol.YELLOW : Ball.YELLOW,
+    Protocol.BLUE   : Ball.BLUE,
+    Protocol.GREEN  : Ball.GREEN
+}
+
 class Server(object):
     def __init__(self):
         self.leaderboard = Leaderboard()
@@ -20,7 +27,7 @@ class Server(object):
         client = { 'socket' : socket,
                    'name' : name,
                    'chat' : chat == Protocol.TRUE,
-                   'challenge': challenge == Protocol.TRUE }
+                   'challenge' : challenge == Protocol.TRUE }
         self.clients.append(client)
         client['socket'].send("%s %s %s%s" % (Protocol.GREET, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
 
@@ -140,7 +147,7 @@ class Server(object):
         return game
 
     def place(self, client, coord, color):
-        if color not in Protocol.COLORS:
+        if color not in COLORS:
             raise ClientError("Given color `%s` is not valid, refer to protocol" % color)
 
         try:
@@ -160,10 +167,10 @@ class Server(object):
             raise ClientError("Client is not current player of game, refer to protocol")
 
         for client in network_game['clients']:
-            client['socket'].send("%s %s %s%s" % (Protocol.PLACE, color, coord, Protocol.EOL))
+            client['socket'].send("%s %s %s%s" % (Protocol.PLACE, coord, color, Protocol.EOL))
 
         try:
-            network_game['game'].place(x, y, Protocol.COLORS[color])
+            network_game['game'].place(x, y, COLORS[color])
             network_game['clients'][network_game['game'].current_player]['socket'].send("%s%s" % (Protocol.PLAY, Protocol.EOL))
         except (GameOverError, ClientError):
             self.game_over(network_game)
