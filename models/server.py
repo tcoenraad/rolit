@@ -3,6 +3,8 @@ import random, datetime
 from models.games import *
 from models.game import *
 from models.protocol import Protocol
+from models.protocol_extended import ProtocolExtended
+
 from models.leaderboard import *
 
 COLORS  = {
@@ -206,6 +208,24 @@ class Server(object):
                 raise ClientError("Given stat `%s` is not recognized, refer to protocol" % stat)
         except NoHighScoresError:
             client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, Protocol.UNDEFINED, Protocol.EOL))
+
+    def send_games(self, client):
+        game_ids = [str(game) for game in self.network_games.keys()]
+        client['socket'].send("%s %s%s" % (ProtocolExtended.GAMES, Protocol.SEPARATOR.join(game_ids), Protocol.EOL))
+
+    def send_game_players(self, client, game_id):
+        try:
+            game_players = [player['name'] for player in self.network_games[int(game_id)]['clients']]
+            client['socket'].send("%s %s%s" % (ProtocolExtended.GAME_PLAYERS, Protocol.SEPARATOR.join(game_players), Protocol.EOL))
+        except (ValueError, KeyError):
+            client['socket'].send("%s %s%s" % (ProtocolExtended.GAME_PLAYERS, Protocol.UNDEFINED, Protocol.EOL))
+
+    def send_game_board(self, client, game_id):
+        try:
+            board = self.network_games[int(game_id)]['game'].board
+            client['socket'].send("%s %s%s" % (ProtocolExtended.GAME_BOARD, board.encode(), Protocol.EOL))
+        except (ValueError, KeyError):
+            client['socket'].send("%s %s%s" % (ProtocolExtended.GAME_BOARD, Protocol.UNDEFINED, Protocol.EOL))
 
 class ServerError(Exception): pass
 class ClientError(Exception): pass

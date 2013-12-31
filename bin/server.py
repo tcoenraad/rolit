@@ -1,17 +1,8 @@
 import socket, sys, threading
-from termcolor import colored
 
 from models.server import *
 from models.protocol import Protocol
-
-def notice(notification):
-    print(colored(notification, 'blue'))
-
-def warning(notification):
-    print(colored(notification, 'yellow'))
-
-def error(notification):
-    print(colored(notification, 'red'))
+from models.helpers import Helpers
 
 class ClientHandler(threading.Thread):
 
@@ -28,9 +19,14 @@ class ClientHandler(threading.Thread):
             # before everything else, greet
             if not data[0] == Protocol.GREET or not data[1]:
                 return
-            self.client = server.connect(self.socket, data[1])
+
+            if len(data) == 2:
+                self.client = server.connect(self.socket, data[1])
+            else:
+                self.client = server.connect(self.socket, data[1], data[2], data[3])
+
             self.name = self.client['name']
-            notice('Client %s introduced itself as `%s`' % (self.client_address, self.name))
+            Helpers.notice('Client %s introduced itself as `%s`' % (self.client_address, self.name))
 
             while True:
                 data = self.socket.recv(4096).strip().split(Protocol.SEPARATOR)
@@ -42,18 +38,36 @@ class ClientHandler(threading.Thread):
                     server.join(self.client, data[1])
                 elif data[0] == Protocol.PLACE and len(data) == 3:
                     server.place(self.client, data[1], data[2])
+                elif data[0] == Protocol.CHAT and len(data) == 2:
+                    server.chat(self.client, data[1])
+                elif data[0] == Protocol.CHALLENGE and len(data) == 2:
+                    server.challenge(self.client, data[1])
+                elif data[0] == Protocol.CHALLENGE and len(data) == 3:
+                    server.challenge(self.client, "%s %s" % (data[1], data[2]))
+                elif data[0] == Protocol.CHALLENGE and len(data) == 4:
+                    server.challenge(self.client, "%s %s %s" % (data[1], data[2], data[3]))
+                elif data[0] == Protocol.CHALLENGE_RESPONSE and len(data) == 2:
+                    server.challenge_response(self.client, data[1])
                 elif data[0] == Protocol.STAT_REQUEST and len(data) == 3:
                     server.stats(self.client, data[1], data[2])
+                elif data[0] == ProtocolExtended.GAMES:
+                    server.send_games(self.client)
+                elif data[0] == ProtocolExtended.GAME_PLAYERS and len(data) == 2:
+                    server.send_game_players(self.client, data[1])
+                elif data[0] == ProtocolExtended.GAME_BOARD and len(data) == 2:
+                    server.send_game_board(self.client, data[1])
                 else:
                     raise ClientError('Invalid command `%s`, refer to protocol' % data)
         except ServerError as e:
-            error('500 Internal Server Error: `%s`' % e)
-            self.socket.send('500 Internal Server Error: `%s`%s' % (e, Protocol.EOL))
+            Helpers.error('500 Internal Server Error: `%s`' % e)
+            self.socket.send('500 Internal Server Error: `%s`' % (e, Protocol.EOL))
         except ClientError as e:
-            warning('Client `%s` made a 400 Bad Request: `%s`%s' % (self.name, e, Protocol.EOL))
+            Helpers.warning('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
             self.socket.send('400 Bad Request: `%s`%s' % (e, Protocol.EOL))
+        except IOError:
+            Helpers.warning('Connection error with %s' % self.name)
         finally:
-            print('Connection lost with %s' % self.name)
+            Helpers.log('Connection lost with %s' % self.name)
             self.socket.close()
 
             if hasattr(self, 'client'):
@@ -71,11 +85,11 @@ sock.listen(1)
 
 server = Server()
 
-print('Server started on port %s' % port)
+Helpers.notice('Server started on port %s' % port)
 
 while True:
     socket, client_address = sock.accept()
-    print('Connection established with %s' % str(client_address))
+    Helpers.log('Connection established with %s' % str(client_address))
     thread = ClientHandler(socket, client_address)
     thread.daemon = True
     thread.start()
