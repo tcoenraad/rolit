@@ -4,30 +4,39 @@ import readline
 from models.client import Client
 from models.protocol import Protocol
 
-client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
-client.socket.connect(('localhost', 3535))
+def main():
+    client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
 
-client.socket.send('greet Monitor 0 0')
-client.response()
-print("Welcome to the Rolit monitor!")
-client.menu()
+    port = 3535
+    if len(sys.argv) >= 2 and sys.argv[1].isdigit():
+        port = int(sys.argv[1])
 
-while True:
-    s = raw_input('$ ')
-    data = s.split(Protocol.SEPARATOR)
+    client.socket.connect(('localhost', port))
 
-    try:
-        option = int(data[0])
-    except ValueError:
-        continue
+    client.socket.send('greet Monitor 0 0')
+    client.response()
+    print("Welcome to the Rolit monitor!")
+    client.menu()
 
-    if option < 0 or option > len(client.options):
-        continue
+    while True:
+        s = raw_input('$ ')
+        data = s.split(Protocol.SEPARATOR)
 
-    if not client.options[option]['args'] == len(data) - 1:
-        continue
+        try:
+            option = int(data[0])
+        except ValueError:
+            continue
 
-    if len(data) == 1:
-        getattr(client, client.options[option]['method'])()
-    elif len(data) == 2:
-        getattr(client, client.options[option]['method'])(data[1])
+        if option < 0 or option > len(client.options):
+            continue
+
+        if not client.options[option]['args'] == len(data) - 1:
+            continue
+
+        if len(data) == 1:
+            getattr(client, client.options[option]['method'])()
+        elif len(data) == 2:
+            getattr(client, client.options[option]['method'])(data[1])
+
+if __name__ == "__main__":
+    main()

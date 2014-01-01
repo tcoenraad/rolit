@@ -36,8 +36,8 @@ class ClientHandler(threading.Thread):
 
                 if data[0] == Protocol.JOIN and len(data) == 2:
                     server.join(self.client, data[1])
-                elif data[0] == Protocol.PLACE and len(data) == 3:
-                    server.place(self.client, data[1], data[2])
+                elif data[0] == Protocol.PLACE and len(data) == 2:
+                    server.place(self.client, data[1])
                 elif data[0] == Protocol.CHAT and len(data) == 2:
                     server.chat(self.client, data[1])
                 elif data[0] == Protocol.CHALLENGE and len(data) == 2:
@@ -73,23 +73,27 @@ class ClientHandler(threading.Thread):
             if hasattr(self, 'client'):
                 server.disconnect(self.client)
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-port = 3535
-if len(sys.argv) >= 2 and sys.argv[1].isdigit():
-    port = int(sys.argv[1])
+    port = 3535
+    if len(sys.argv) >= 2 and sys.argv[1].isdigit():
+        port = int(sys.argv[1])
 
-sock.bind(('0.0.0.0', port))
-sock.listen(1)
+    sock.bind(('0.0.0.0', port))
+    sock.listen(1)
 
-server = Server()
+    server = Server()
 
-Helpers.notice('Server started on port %s' % port)
+    Helpers.notice('Server started on port %s' % port)
 
-while True:
-    socket, client_address = sock.accept()
-    Helpers.log('Connection established with %s' % str(client_address))
-    thread = ClientHandler(socket, client_address)
-    thread.daemon = True
-    thread.start()
+    while True:
+        socket, client_address = sock.accept()
+        Helpers.log('Connection established with %s' % str(client_address))
+        thread = ClientHandler(socket, client_address)
+        thread.daemon = True
+        thread.start()
+
+if __name__ == "__main__":
+    main()
