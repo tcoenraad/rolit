@@ -54,30 +54,25 @@ class TestServer():
     def test_it_validates_dimension_of_board(self):
         self.server.start_game([self.clients[0], self.clients[1]])
         with pytest.raises(ClientError):
-            self.server.place(self.clients[0], '-1', Protocol.RED)
+            self.server.place(self.clients[0], '-1')
         with pytest.raises(ClientError):
-            self.server.place(self.clients[0], '88', Protocol.RED)
-
-    def test_it_validates_colors_are_colors(self):
-        self.server.start_game([self.clients[0], self.clients[1]])
-        with pytest.raises(ClientError):
-            self.server.place(self.clients[0], '53', 'Inter-/Actief/-blauw')
+            self.server.place(self.clients[0], '88')
 
     def test_it_validates_client_is_in_game(self):
         with pytest.raises(ClientError):
-            self.server.place(self.clients[0], '53', Protocol.RED)
+            self.server.place(self.clients[0], '53')
 
         game = self.server.start_game([self.clients[0], self.clients[1]])
         game.balls_left = 1
 
-        self.server.place(self.clients[0], '53', Protocol.RED)
+        self.server.place(self.clients[0], '53')
         with pytest.raises(ClientError):
-            self.server.place(self.clients[0], '53', Protocol.RED)
+            self.server.place(self.clients[0], '53')
 
     def test_it_validates_it_is_clients_turn(self):
         self.server.start_game([self.clients[0], self.clients[1], self.clients[2]])
         with pytest.raises(ClientError):
-            self.server.place(self.clients[1], '52', Protocol.YELLOW)
+            self.server.place(self.clients[1], '52')
 
     def test_game_goes_game_overs_on_disconnect(self):
         self.server.start_game([self.clients[0], self.clients[1]])
@@ -249,10 +244,10 @@ class TestServer():
         game = self.server.start_game([self.clients[0], self.clients[1]])
         game.balls_left = 1
 
-        self.server.place(self.clients[0], '53', Protocol.RED)
+        self.server.place(self.clients[0], '53')
 
         args = [call("%s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL)),
-            call("%s %s %s%s" % (Protocol.PLACE, '53', Protocol.RED, Protocol.EOL)),
+            call("%s %s%s" % (Protocol.PLACE, '53', Protocol.EOL)),
             call("%s %s%s" % (Protocol.GAME_OVER, self.clients[0]['name'], Protocol.EOL))]
 
         args.insert(1, call("%s%s" % (Protocol.PLAY, Protocol.EOL)))
@@ -266,12 +261,12 @@ class TestServer():
         game = self.server.start_game([self.clients[0], self.clients[1], self.clients[2]])
         game.balls_left = 2
 
-        self.server.place(self.clients[0], '53', Protocol.RED)
-        self.server.place(self.clients[1], '52', Protocol.BLUE)
+        self.server.place(self.clients[0], '53')
+        self.server.place(self.clients[1], '52')
 
         args = [call("%s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], Protocol.EOL)),
-            call("%s %s %s%s" % (Protocol.PLACE, '53', Protocol.RED, Protocol.EOL)),
-            call("%s %s %s%s" % (Protocol.PLACE, '52', Protocol.BLUE, Protocol.EOL)),
+            call("%s %s%s" % (Protocol.PLACE, '53', Protocol.EOL)),
+            call("%s %s%s" % (Protocol.PLACE, '52', Protocol.EOL)),
             call("%s %s%s" % (Protocol.GAME_OVER, self.clients[1]['name'], Protocol.EOL))]
         
         args.insert(1, call("%s%s" % (Protocol.PLAY, Protocol.EOL)))
@@ -289,14 +284,14 @@ class TestServer():
         game = self.server.start_game([self.clients[0], self.clients[1], self.clients[2], self.clients[3]])
         game.balls_left = 3
 
-        self.server.place(self.clients[0], '53', Protocol.RED)
-        self.server.place(self.clients[1], '52', Protocol.BLUE)
-        self.server.place(self.clients[2], '24', Protocol.GREEN)
+        self.server.place(self.clients[0], '53')
+        self.server.place(self.clients[1], '52')
+        self.server.place(self.clients[2], '24')
 
         args = [call("%s %s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], self.clients[3]['name'], Protocol.EOL)),
-            call("%s %s %s%s" % (Protocol.PLACE, '53', Protocol.RED, Protocol.EOL)),
-            call("%s %s %s%s" % (Protocol.PLACE, '52', Protocol.BLUE, Protocol.EOL)),
-            call("%s %s %s%s" % (Protocol.PLACE, '24', Protocol.GREEN, Protocol.EOL)),
+            call("%s %s%s" % (Protocol.PLACE, '53', Protocol.EOL)),
+            call("%s %s%s" % (Protocol.PLACE, '52', Protocol.EOL)),
+            call("%s %s%s" % (Protocol.PLACE, '24', Protocol.EOL)),
             call("%s %s%s" % (Protocol.GAME_OVER, self.clients[2]['name'], Protocol.EOL))]
 
         args.insert(1, call("%s%s" % (Protocol.PLAY, Protocol.EOL)))
@@ -316,7 +311,7 @@ class TestServer():
 
     def test_it_gives_the_right_date_stats(self):
         game = self.server.start_game([self.clients[0], self.clients[1]])
-        self.server.place(self.clients[0], '53', Protocol.RED)
+        self.server.place(self.clients[0], '53')
         self.server.game_over(self.server.network_games[id(game)])
 
         self.server.stats(self.clients[0], Protocol.STAT_DATE, str(time.time()))
@@ -328,7 +323,7 @@ class TestServer():
 
     def test_it_gives_the_right_player_stats(self):
         game = self.server.start_game([self.clients[0], self.clients[1]])
-        self.server.place(self.clients[0], '53', Protocol.RED)
+        self.server.place(self.clients[0], '53')
         self.server.game_over(self.server.network_games[id(game)])
 
         self.server.stats(self.clients[0], Protocol.STAT_PLAYER, self.clients[0]['name'])

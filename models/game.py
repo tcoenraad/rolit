@@ -21,9 +21,8 @@ class Game(object):
 
         return [player for (player, color) in self.players().items() if stats[color] == player_max]
 
-    def place(self, x, y, color):
-        if color != self.players()[self.current_player]:
-            raise NotAllowedColorError('Given color does not belong to the current player')
+    def place(self, x, y):
+        color = self.players()[self.current_player]
 
         self.board.place(x, y, color)
         self.current_player = (self.current_player + 1) % self.player_amount
