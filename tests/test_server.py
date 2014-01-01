@@ -135,7 +135,7 @@ class TestServer():
             self.server.challenge(self.clients[4], "%s" % (self.clients[1]['name']))
 
     def test_challenge_requests(self):
-        self.server.challenge(self.clients[0], "%s %s" % (self.clients[1]['name'], self.clients[4]['name']))
+        self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
 
         args = call("%s %s %s %s%s" % (Protocol.CHALLENGE, self.clients[0]['name'], self.clients[1]['name'], self.clients[4]['name'], Protocol.EOL))
         self.clients[1]['socket'].send.assert_has_calls(args)
@@ -143,7 +143,7 @@ class TestServer():
         assert self.clients[2]['socket'].send.call_count == 1
         assert self.clients[3]['socket'].send.call_count == 1
 
-        self.server.challenge(self.clients[0], "%s" % (self.clients[1]['name']))
+        self.server.challenge(self.clients[0], self.clients[1]['name'])
         args = call("%s%s" % (Protocol.CHALLENGE_REJECTED, Protocol.EOL))
         self.clients[0]['socket'].send.assert_has_calls(args)
         self.clients[1]['socket'].send.assert_has_calls(args)
@@ -155,7 +155,7 @@ class TestServer():
     def test_challenge_request_accepted(self):
         self.server.start_game = Mock()
 
-        self.server.challenge(self.clients[0], "%s %s" % (self.clients[1]['name'], self.clients[4]['name']))
+        self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
         self.server.challenge_response(self.clients[1], Protocol.TRUE)
         assert self.server.start_game.call_count == 0
 
@@ -165,7 +165,7 @@ class TestServer():
     def test_challenge_request_rejected(self):
         self.server.start_game = Mock()
 
-        self.server.challenge(self.clients[0], "%s %s" % (self.clients[1]['name'], self.clients[4]['name']))
+        self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
         self.server.challenge_response(self.clients[1], Protocol.TRUE)
         assert self.server.start_game.call_count == 0
 

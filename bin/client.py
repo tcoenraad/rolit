@@ -1,4 +1,5 @@
 import socket
+import sys
 import readline
 
 from models.client import Client
@@ -27,16 +28,16 @@ def main():
         except ValueError:
             continue
 
-        if option < 0 or option > len(client.options):
+        if option < 0 or option > len(client.router):
             continue
 
         if not client.options[option]['args'] == len(data) - 1:
             continue
 
         if len(data) == 1:
-            getattr(client, client.options[option]['method'])()
+            getattr(client, client.router[option]['method'])()
         elif len(data) == 2:
-            getattr(client, client.options[option]['method'])(data[1])
+            getattr(client, client.router[option]['method'])(data[1])
 
 if __name__ == "__main__":
     main()

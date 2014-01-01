@@ -53,14 +53,13 @@ class Server(object):
         for chat_client in chat_clients:
             chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], message, Protocol.EOL))
 
-    def challenge(self, challenger, challengees):
+    def challenge(self, challenger, *challenged_names):
         if not challenger['challenge']:
             raise ClientError("You said you did not support challenges, so you cannot send a challenge request")
 
         if challenger['name'] in self.challenge_list:
             self.remove_challenge(challenger['name'])
 
-        challenged_names = challengees.split(' ')
         challenged_clients = [self.get_client(challengee) for challengee in challenged_names]
         if challenger in challenged_clients:
             raise ClientError("You challenged yourself, what do you think?")
@@ -81,7 +80,7 @@ class Server(object):
         self.challenge_list[challenger['name']] = { challenger['name'] : True }
         for challenged_client in challenged_clients:
             self.challenge_list[challenger['name']][challenged_client['name']] = False
-            challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], challengees, Protocol.EOL))
+            challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
 
 
     def challenge_response(self, challengee, response):
