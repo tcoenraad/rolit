@@ -8,14 +8,14 @@ class Client(object):
 
     def __init__(self, socket):
         self.socket = socket
-        self.router = { 1 : { 'method': 'get_games', 'args': 0, 'description': "Get all running games" },
-                        2 : { 'method': 'get_game_players', 'args': 1, 'description': "<id> Show game players" },
-                        3 : { 'method': 'get_game_board', 'args': 1, 'description': "<id> Show game board" },
-                        4 : { 'method': 'menu', 'args': 0, 'description': "Show this help menu" } }
+        self.options = { 1 : { 'method': 'get_games', 'args': 0, 'description': "Get all running games" },
+                         2 : { 'method': 'get_game_players', 'args': 1, 'description': "<id> Show game players" },
+                         3 : { 'method': 'get_game_board', 'args': 1, 'description': "<id> Show game board" },
+                         4 : { 'method': 'menu', 'args': 0, 'description': "Show this help menu" } }
 
     def menu(self):
         Helpers.notice('-' * 16)
-        for (key, value) in self.router.iteritems():
+        for (key, value) in self.options.iteritems():
             print("%s %s" % (key, value['description']))
         Helpers.notice('-' * 16)
 

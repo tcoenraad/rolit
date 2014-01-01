@@ -23,20 +23,20 @@ def main():
         data = s.split(Protocol.SEPARATOR)
 
         try:
-            route = int(data[0])
+            option = int(data[0])
         except ValueError:
             continue
 
-        if route < 0 or route > len(client.router):
+        if option < 0 or option > len(client.options):
             continue
 
-        if not client.router[route]['args'] == len(data) - 1:
+        if not client.options[option]['args'] == len(data) - 1:
             continue
 
         if len(data) == 1:
-            getattr(client, client.router[route]['method'])()
+            getattr(client, client.options[option]['method'])()
         elif len(data) == 2:
-            getattr(client, client.router[route]['method'])(data[1])
+            getattr(client, client.options[option]['method'])(data[1])
 
 if __name__ == "__main__":
     main()

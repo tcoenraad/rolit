@@ -14,7 +14,7 @@ router = {
     Protocol.CHALLENGE : { 'args' : 2, 'method' : 'challenge' },
     Protocol.CHALLENGE : { 'args' : 3, 'method' : 'challenge' },
     Protocol.CHALLENGE_RESPONSE : { 'args' : 1, 'method' : 'challenge_response' },
-    Protocol.STAT_REQUEST : { 'args' : 2, 'method' : 'stat' },
+    Protocol.STAT_REQUEST : { 'args' : 2, 'method' : 'stats' },
     ProtocolExtended.GAMES: { 'args' : 0, 'method' : 'send_games'},
     ProtocolExtended.GAME_PLAYERS : { 'args' : 1, 'method' : 'send_game_players'},
     ProtocolExtended.GAME_BOARD : { 'args' : 1, 'method' : 'send_game_board'}

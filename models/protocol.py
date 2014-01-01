@@ -18,8 +18,8 @@ class Protocol(object):
 
     STAT_REQUEST = 'stat_request'
     STAT         = 'stat'
-    STAT_DATE    = 'date'
-    STAT_PLAYER  = 'player'
+    STAT_DATE    = 'stat_date'
+    STAT_PLAYER  = 'stat_player'
 
     SEPARATOR    = ' '
     EOL          = "\r\n"
