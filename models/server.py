@@ -40,66 +40,6 @@ class Server(object):
         if 'game_id' in client:
             self.game_over(self.network_games[client['game_id']])
 
-    def chat(self, sender, message):
-        if not sender['chat']:
-            raise ClientError("You said you did not support chat, so you cannot send a chat message")
-
-        if 'game_id' in sender:
-            clients = self.network_games[sender['game_id']]['clients']
-        else:
-            clients = [client for client in self.clients if 'game_id' not in client]
-        chat_clients = [client for client in clients if client['chat']]
-
-        for chat_client in chat_clients:
-            chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], message, Protocol.EOL))
-
-    def challenge(self, challenger, *challenged_names):
-        if not challenger['challenge']:
-            raise ClientError("You said you did not support challenges, so you cannot send a challenge request")
-
-        if challenger['name'] in self.challenge_list:
-            self.remove_challenge(challenger['name'])
-
-        challenged_clients = [self.get_client(challengee) for challengee in challenged_names]
-        if challenger in challenged_clients:
-            raise ClientError("You challenged yourself, what do you think?")
-
-        if len(challenged_clients) > 3:
-            raise ClientError("You challenged more than 3 players, refer to the protocol")
-
-        if False in challenged_clients:
-            raise ClientError("You challenged someone who does not exist")
-
-        if False in [challenged_client['challenge'] for challenged_client in challenged_clients]:
-            raise ClientError("You challenged someone who does not support challenges")
-
-        all_challengees = [item for sublist in [challenge.keys() for challenge in self.challenge_list.values()] for item in sublist]
-        if len(list(set(all_challengees) & set(challenged_names))) > 0:
-            raise AlreadyChallengedError("You challenged someone who already is in challenge")
-
-        self.challenge_list[challenger['name']] = { challenger['name'] : True }
-        for challenged_client in challenged_clients:
-            self.challenge_list[challenger['name']][challenged_client['name']] = False
-            challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
-
-
-    def challenge_response(self, challengee, response):
-        for challenge, challengees in self.challenge_list.iteritems():
-            if challengee['name'] in challengees:
-                if response == Protocol.TRUE:
-                    challengees[challengee['name']] = True
-                    if all(challengees.values()):
-                        self.start_game([self.get_client(client_name) for client_name in challengees])
-                elif response == Protocol.FALSE:
-                    self.remove_challenge(challenge)
-                return
-        raise ClientError("You responded while you were not challenged")
-
-    def remove_challenge(self, challenger):
-        for challengee in self.challenge_list[challenger]:
-            self.get_client(challengee)['socket'].send("%s%s" % (Protocol.CHALLENGE_REJECTED, Protocol.EOL))
-        del(self.challenge_list[challenger])
-
     def join(self, client, number_of_players):
         try:
             number_of_players = int(number_of_players)
@@ -180,6 +120,66 @@ class Server(object):
                     self.leaderboard.add_score(client['name'], datetime.datetime.now(), 0)
                 del(client['game_id'])
 
+    def chat(self, sender, message):
+        if not sender['chat']:
+            raise ClientError("You said you did not support chat, so you cannot send a chat message")
+
+        if 'game_id' in sender:
+            clients = self.network_games[sender['game_id']]['clients']
+        else:
+            clients = [client for client in self.clients if 'game_id' not in client]
+        chat_clients = [client for client in clients if client['chat']]
+
+        for chat_client in chat_clients:
+            chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], message, Protocol.EOL))
+
+    def challenge(self, challenger, *challenged_names):
+        if not challenger['challenge']:
+            raise ClientError("You said you did not support challenges, so you cannot send a challenge request")
+
+        if challenger['name'] in self.challenge_list:
+            self.remove_challenge(challenger['name'])
+
+        challenged_clients = [self.get_client(challengee) for challengee in challenged_names]
+        if challenger in challenged_clients:
+            raise ClientError("You challenged yourself, what do you think?")
+
+        if len(challenged_clients) > 3:
+            raise ClientError("You challenged more than 3 players, refer to the protocol")
+
+        if False in challenged_clients:
+            raise ClientError("You challenged someone who does not exist")
+
+        if False in [challenged_client['challenge'] for challenged_client in challenged_clients]:
+            raise ClientError("You challenged someone who does not support challenges")
+
+        all_challengees = [item for sublist in [challenge.keys() for challenge in self.challenge_list.values()] for item in sublist]
+        if len(list(set(all_challengees) & set(challenged_names))) > 0:
+            raise AlreadyChallengedError("You challenged someone who already is in challenge")
+
+        self.challenge_list[challenger['name']] = { challenger['name'] : True }
+        for challenged_client in challenged_clients:
+            self.challenge_list[challenger['name']][challenged_client['name']] = False
+            challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
+
+
+    def challenge_response(self, challengee, response):
+        for challenge, challengees in self.challenge_list.iteritems():
+            if challengee['name'] in challengees:
+                if response == Protocol.TRUE:
+                    challengees[challengee['name']] = True
+                    if all(challengees.values()):
+                        self.start_game([self.get_client(client_name) for client_name in challengees])
+                elif response == Protocol.FALSE:
+                    self.remove_challenge(challenge)
+                return
+        raise ClientError("You responded while you were not challenged")
+
+    def remove_challenge(self, challenger):
+        for challengee in self.challenge_list[challenger]:
+            self.get_client(challengee)['socket'].send("%s%s" % (Protocol.CHALLENGE_REJECTED, Protocol.EOL))
+        del(self.challenge_list[challenger])
+
     def stats(self, client, stat, arg):
         try:
             if stat == Protocol.STAT_DATE:
@@ -205,16 +205,16 @@ class Server(object):
     def send_game_players(self, client, game_id):
         try:
             game_players = [player['name'] for player in self.network_games[int(game_id)]['clients']]
-            client['socket'].send("%s %s%s" % (ProtocolExtended.GAME_PLAYERS, Protocol.SEPARATOR.join(game_players), Protocol.EOL))
+            client['socket'].send("%s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, game_id, Protocol.SEPARATOR.join(game_players), Protocol.EOL))
         except (ValueError, KeyError):
-            client['socket'].send("%s %s%s" % (ProtocolExtended.GAME_PLAYERS, Protocol.UNDEFINED, Protocol.EOL))
+            client['socket'].send("%s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, game_id, Protocol.UNDEFINED, Protocol.EOL))
 
     def send_game_board(self, client, game_id):
         try:
             board = self.network_games[int(game_id)]['game'].board
-            client['socket'].send("%s %s%s" % (ProtocolExtended.GAME_BOARD, board.encode(), Protocol.EOL))
+            client['socket'].send("%s %s %s%s" % (ProtocolExtended.GAME_BOARD, game_id, board.encode(), Protocol.EOL))
         except (ValueError, KeyError):
-            client['socket'].send("%s %s%s" % (ProtocolExtended.GAME_BOARD, Protocol.UNDEFINED, Protocol.EOL))
+            client['socket'].send("%s %s %s%s" % (ProtocolExtended.GAME_BOARD, game_id, Protocol.UNDEFINED, Protocol.EOL))
 
 class ServerError(Exception): pass
 class ClientError(Exception): pass

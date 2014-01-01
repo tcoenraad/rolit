@@ -30,19 +30,12 @@ class TestServer():
         game = self.server.start_game([self.clients[0], self.clients[1]])
         self.server.send_game_players(self.clients[0], id(game))
 
-        args = "%s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL)
-        self.clients[0]['socket'].send.assert_has_calls(call(args))
-
-    def test_send_game_players(self):
-        game = self.server.start_game([self.clients[0], self.clients[1]])
-        self.server.send_game_players(self.clients[0], id(game))
-
-        args = "%s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL)
+        args = "%s %s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, id(game), self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL)
         self.clients[0]['socket'].send.assert_has_calls(call(args))
 
     def test_send_game_board(self):
         game = self.server.start_game([self.clients[0], self.clients[1]])
         self.server.send_game_board(self.clients[0], id(game))
 
-        args = "%s %s%s" % (ProtocolExtended.GAME_BOARD, game.board.encode(), Protocol.EOL)
+        args = "%s %s %s%s" % (ProtocolExtended.GAME_BOARD, id(game), game.board.encode(), Protocol.EOL)
         self.clients[0]['socket'].send.assert_has_calls(call(args))
