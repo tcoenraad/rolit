@@ -170,7 +170,6 @@ class Server(object):
             self.challenge_list[challenger['name']][challenged_client['name']] = False
             challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
 
-
     def challenge_response(self, challengee, response):
         for challenge, challengees in self.challenge_list.iteritems():
             if challengee['name'] in challengees:
@@ -197,7 +196,7 @@ class Server(object):
                     raise ClientError("Given argument `%s` cannot be converted to a floating point" % arg)
 
                 score = self.leaderboard.best_score_of_date(datetime.datetime.fromtimestamp(time))
-                client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, score.score, Protocol.EOL))
+                client['socket'].send("%s %s %s %s %s%s" % (Protocol.STAT, stat, arg, score.name, score.score, Protocol.EOL))
             elif stat == Protocol.STAT_PLAYER:
                 score = self.leaderboard.best_score_of_player(arg)
                 client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, score.score, Protocol.EOL))

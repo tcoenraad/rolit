@@ -51,7 +51,7 @@ class TestServer():
         with pytest.raises(ClientError):
             self.server.join(self.clients[0], 'vijfendertig')
 
-    def test_it_validates_given_number_represents_a_dimension_on_board(self):
+    def test_it_validates_given_number_represents_a_field_on_board(self):
         self.server.game_over = Mock()
 
         self.server.start_game([self.clients[0], self.clients[1]])
@@ -325,7 +325,7 @@ class TestServer():
         self.server.stats(self.clients[0], Protocol.STAT_DATE, str(time.time()))
         self.server.stats(self.clients[0], Protocol.STAT_DATE, str(time.mktime(datetime.datetime(2013, 9, 3).timetuple())))
 
-        args = [call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_DATE, time.time(), '1', Protocol.EOL)),
+        args = [call("%s %s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_DATE, time.time(), self.clients[0]['name'], '1', Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_DATE, time.mktime(datetime.datetime(2013, 9, 3).timetuple()), Protocol.UNDEFINED, Protocol.EOL))]
         self.clients[0]['socket'].send.assert_has_calls(args)
 

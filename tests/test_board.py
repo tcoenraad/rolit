@@ -62,6 +62,14 @@ class TestBoard():
         with pytest.raises(AlreadyOccupiedError):
             self.board.place(3, 2, Ball.BLUE)
 
+    def test_it_validates_given_coordinates_represent_a_field_on_board(self):
+        with pytest.raises(AlreadyOccupiedError):
+            self.board.place(-1, 0, Ball.RED)
+        with pytest.raises(AlreadyOccupiedError):
+            self.board.place(8, 8, Ball.RED)
+        with pytest.raises(AlreadyOccupiedError):
+            self.board.place('a', 'b', Ball.RED)
+
     def test_it_only_allows_adjacent_placements(self):
         with pytest.raises(NotAdjacentError):
             self.board.place(6, 2, Ball.GREEN)
@@ -78,14 +86,6 @@ class TestBoard():
 
         self.board.place(5, 3, Ball.RED)
         self.board.place(2, 2, Ball.YELLOW)
-
-    def test_it_validates_dimension_of_board(self):
-        with pytest.raises(BoardError):
-            self.board.place(-1, 0, Ball.RED)
-        with pytest.raises(BoardError):
-            self.board.place(8, 8, Ball.RED)
-        with pytest.raises(BoardError):
-            self.board.place('a', 'b', Ball.RED)
 
     def test_it_encodes(self):
         assert self.board.encode() == "empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty red yellow empty empty empty empty empty empty blue green empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty"
