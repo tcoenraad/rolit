@@ -16,7 +16,6 @@ class Protocol(object):
     BLUE         = 'blue'
     GREEN        = 'green'
 
-    STAT_REQUEST = 'stat_request'
     STAT         = 'stat'
     STAT_DATE    = 'stat_date'
     STAT_PLAYER  = 'stat_player'

@@ -14,7 +14,7 @@ router = {
     Protocol.CHALLENGE : { 'args' : 2, 'method' : 'challenge' },
     Protocol.CHALLENGE : { 'args' : 3, 'method' : 'challenge' },
     Protocol.CHALLENGE_RESPONSE : { 'args' : 1, 'method' : 'challenge_response' },
-    Protocol.STAT_REQUEST : { 'args' : 2, 'method' : 'stats' },
+    Protocol.STAT : { 'args' : 2, 'method' : 'stats' },
     ProtocolExtended.GAMES: { 'args' : 0, 'method' : 'send_games'},
     ProtocolExtended.GAME_PLAYERS : { 'args' : 1, 'method' : 'send_game_players'},
     ProtocolExtended.GAME_BOARD : { 'args' : 1, 'method' : 'send_game_board'}
@@ -32,6 +32,7 @@ class ClientHandler(threading.Thread):
     def run(self):
         try:
             data = self.socket.recv(4096).strip().split(Protocol.SEPARATOR)
+            Helpers.log("`%s`: `%s`" % (self.name, data))
 
             # before everything else, greet
             if not data[0] == Protocol.GREET or not data[1]:
@@ -47,10 +48,10 @@ class ClientHandler(threading.Thread):
 
             while True:
                 data = self.socket.recv(4096).strip().split(Protocol.SEPARATOR)
-        
+
+                Helpers.log("`%s`: `%s`" % (self.name, data))
                 if not data:
                     break
-
                 try:
                     route = router[data[0]]
                     if not route['args'] == len(data) - 1:
@@ -93,7 +94,7 @@ def main():
 
     server = Server()
 
-    Helpers.notice('Server started on port %s' % port)
+    Helpers.notice('Rolit server started on port %s' % port)
 
     while True:
         conn, client_address = sock.accept()
