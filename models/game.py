@@ -1,7 +1,11 @@
+import abc
+
 from models.board import Board
 from models.ball import Ball
 
 class Game(object):
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, player_amount):
         self.board = Board()
 
@@ -12,6 +16,10 @@ class Game(object):
         self.player_amount = player_amount
 
         self.current_player = 0
+
+    @abc.abstractmethod
+    def players(self):
+        return
 
     def winning_players(self):
         stats = self.board.stats()

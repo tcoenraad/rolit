@@ -1,6 +1,5 @@
 import socket
 import sys
-import readline
 
 from models.client import Client
 from models.protocol import Protocol
@@ -24,20 +23,20 @@ def main():
         data = s.split(Protocol.SEPARATOR)
 
         try:
-            option = int(data[0])
+            route = int(data[0])
         except ValueError:
             continue
 
-        if option < 0 or option > len(client.router):
+        if route < 0 or route > len(client.router):
             continue
 
-        if not client.options[option]['args'] == len(data) - 1:
+        if not client.route[route]['args'] == len(data) - 1:
             continue
 
         if len(data) == 1:
-            getattr(client, client.router[option]['method'])()
+            getattr(client, client.router[route]['method'])()
         elif len(data) == 2:
-            getattr(client, client.router[option]['method'])(data[1])
+            getattr(client, client.router[route]['method'])(data[1])
 
 if __name__ == "__main__":
     main()

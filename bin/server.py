@@ -67,7 +67,7 @@ class ClientHandler(threading.Thread):
                     raise ClientError('Invalid command `%s`, refer to protocol' % data)
         except ServerError as e:
             Helpers.error('500 Internal Server Error: `%s`' % e)
-            self.socket.send('500 Internal Server Error: `%s`' % (e, Protocol.EOL))
+            self.socket.send('500 Internal Server Error: `%s`%s' % (e, Protocol.EOL))
         except ClientError as e:
             Helpers.warning('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
             self.socket.send('400 Bad Request: `%s`%s' % (e, Protocol.EOL))
