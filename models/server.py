@@ -184,11 +184,11 @@ class Server(object):
         try:
             if stat == Protocol.STAT_DATE:
                 try:
-                    arg = float(arg)
+                    time = float(arg)
                 except ValueError:
                     raise ClientError("Given argument `%s` cannot be converted to a floating point" % arg)
 
-                score = self.leaderboard.best_score_of_date(datetime.datetime.fromtimestamp(arg))
+                score = self.leaderboard.best_score_of_date(datetime.datetime.fromtimestamp(time))
                 client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, score.score, Protocol.EOL))
             elif stat == Protocol.STAT_PLAYER:
                 score = self.leaderboard.best_score_of_player(arg)
