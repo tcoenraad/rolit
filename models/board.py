@@ -150,8 +150,7 @@ class Board(object):
 
         return string
 
-class AlreadyOccupiedError(Exception): pass
-
-class NotAdjacentError(Exception): pass
-
-class ForcedMoveError(Exception): pass
+class BoardError(Exception): pass
+class AlreadyOccupiedError(BoardError): pass
+class NotAdjacentError(BoardError): pass
+class ForcedMoveError(BoardError): pass

@@ -39,5 +39,4 @@ class Game(object):
         if self.balls_left == 0:
             raise GameOverError('Game is over and won by %s' % self.winning_players())
 
-class NotAllowedColorError(Exception): pass
 class GameOverError(Exception): pass

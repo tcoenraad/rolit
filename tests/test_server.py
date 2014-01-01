@@ -51,12 +51,20 @@ class TestServer():
         with pytest.raises(ClientError):
             self.server.join(self.clients[0], 'vijfendertig')
 
-    def test_it_validates_dimension_of_board(self):
+    def test_it_validates_given_number_represents_a_dimension_on_board(self):
+        self.server.game_over = Mock()
+
         self.server.start_game([self.clients[0], self.clients[1]])
         with pytest.raises(ClientError):
             self.server.place(self.clients[0], '-1')
         with pytest.raises(ClientError):
             self.server.place(self.clients[0], '88')
+        with pytest.raises(ClientError):
+            self.server.place(self.clients[0], 'ab')
+        with pytest.raises(ClientError):
+            self.server.place(self.clients[0], '0000')
+
+        assert self.server.game_over.call_count == 4
 
     def test_it_validates_client_is_in_game(self):
         with pytest.raises(ClientError):
@@ -331,6 +339,6 @@ class TestServer():
         self.server.stats(self.clients[0], Protocol.STAT_PLAYER, self.clients[2]['name'])
 
         args = [call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_PLAYER, self.clients[0]['name'], '1', Protocol.EOL)),
-                        call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_PLAYER, self.clients[1]['name'], '0', Protocol.EOL)),
-                        call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_PLAYER, self.clients[2]['name'], Protocol.UNDEFINED, Protocol.EOL))]
+                call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_PLAYER, self.clients[1]['name'], '0', Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.STAT, Protocol.STAT_PLAYER, self.clients[2]['name'], Protocol.UNDEFINED, Protocol.EOL))]
         self.clients[0]['socket'].send.assert_has_calls(args)

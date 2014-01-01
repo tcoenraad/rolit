@@ -1,7 +1,8 @@
 import random, datetime
 
 from models.games import *
-from models.game import *
+from models.game import Game, GameOverError
+from models.board import BoardError
 from models.protocol import Protocol
 from models.protocol_extended import ProtocolExtended
 
@@ -82,29 +83,36 @@ class Server(object):
 
     def place(self, client, coord):
         try:
-            x = int(coord[0])
-            y = int(coord[1])
-        except ValueError:
-            raise ClientError("Given coordinate `%s` is not an integer, refer to protocol" % coord)
+            try:
+                network_game = self.network_games[client['game_id']]
+            except KeyError:
+                raise ClientError("Client is not in-game, refer to protocol")
 
-        if x < 0 or x >= Board.DIM or y < 0 or y >= Board.DIM:
-            raise ClientError("Given coordinate `%s` does not exist on board, refer to protocol" % coord)
+            try:
+                x = int(coord[0])
+                y = int(coord[1])
+            except ValueError:
+                raise ClientError("Given coordinate `%s` is not an integer, refer to protocol" % coord)
 
-        if 'game_id' not in client:
-            raise ClientError("Client is not in-game, refer to protocol")
+            if len(coord) > 2 or x < 0 or x >= Board.DIM or y < 0 or y >= Board.DIM:
+                raise ClientError("Given coordinate `%s` does not exist on board, refer to protocol" % coord)
 
-        network_game = self.network_games[client['game_id']]
-        if network_game['game'].current_player != network_game['clients'].index(client):
-            raise ClientError("Client is not current player of game, refer to protocol")
+            if network_game['game'].current_player != network_game['clients'].index(client):
+                raise ClientError("Client is not current player of game, refer to protocol")
 
-        for client in network_game['clients']:
-            client['socket'].send("%s %s%s" % (Protocol.PLACE, coord, Protocol.EOL))
+            for client in network_game['clients']:
+                client['socket'].send("%s %s%s%s" % (Protocol.PLACE, x, y, Protocol.EOL))
+            try:
+                network_game['game'].place(x, y)
+            except BoardError:
+                raise ClientError("Given coordinate `%s` is not a valid move on the current board")
 
-        try:
-            network_game['game'].place(x, y)
             network_game['clients'][network_game['game'].current_player]['socket'].send("%s%s" % (Protocol.PLAY, Protocol.EOL))
-        except (GameOverError, ClientError):
-            self.game_over(network_game)
+        except (ClientError, GameOverError) as e:
+            if 'network_game' in locals():
+                self.game_over(network_game)
+            if isinstance(e, ClientError):
+                raise e
 
     def game_over(self, network_game):
         for client in network_game['clients']:
