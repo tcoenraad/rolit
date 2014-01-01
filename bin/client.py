@@ -30,7 +30,7 @@ def main():
         if route < 0 or route > len(client.router):
             continue
 
-        if not client.route[route]['args'] == len(data) - 1:
+        if not client.router[route]['args'] == len(data) - 1:
             continue
 
         if len(data) == 1:
