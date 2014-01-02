@@ -2,9 +2,9 @@ import socket
 import sys
 import threading
 
-from models.server import *
-from models.protocol import Protocol
-from models.helpers import Helpers
+from rolit.server import *
+from rolit.protocol import Protocol
+from rolit.helpers import Helpers
 
 router = {
     Protocol.JOIN : { 'args' : 1, 'method' : 'join' },

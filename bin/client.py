@@ -1,8 +1,8 @@
 import socket
 import sys
 
-from models.client import Client
-from models.protocol import Protocol
+from rolit.client import Client
+from rolit.protocol import Protocol
 
 def main():
     client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
