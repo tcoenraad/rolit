@@ -1,12 +1,12 @@
 import random, datetime
 
-from rolit.games import *
+from rolit.games import TwoPlayerGame, ThreePlayerGame, FourPlayerGame
 from rolit.game import Game, GameOverError
-from rolit.board import BoardError
+from rolit.board import Board, BoardError
 from rolit.protocol import Protocol
 from rolit.protocol_extended import ProtocolExtended
 
-from rolit.leaderboard import *
+from rolit.leaderboard import Leaderboard, NoHighScoresError
 
 class Server(object):
     def __init__(self):
