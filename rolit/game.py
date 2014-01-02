@@ -1,7 +1,7 @@
 import abc
 
-from models.board import Board
-from models.ball import Ball
+from rolit.board import Board
+from rolit.ball import Ball
 
 class Game(object):
     __metaclass__ = abc.ABCMeta

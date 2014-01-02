@@ -1,7 +1,7 @@
 from termcolor import colored
 
-from models.protocol import Protocol
-from models.protocol_extended import ProtocolExtended
+from rolit.protocol import Protocol
+from rolit.protocol_extended import ProtocolExtended
 
 class Ball(object):
 

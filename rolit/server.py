@@ -1,12 +1,12 @@
 import random, datetime
 
-from models.games import *
-from models.game import Game, GameOverError
-from models.board import BoardError
-from models.protocol import Protocol
-from models.protocol_extended import ProtocolExtended
+from rolit.games import *
+from rolit.game import Game, GameOverError
+from rolit.board import BoardError
+from rolit.protocol import Protocol
+from rolit.protocol_extended import ProtocolExtended
 
-from models.leaderboard import *
+from rolit.leaderboard import *
 
 class Server(object):
     def __init__(self):

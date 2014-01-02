@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from models.ball import Ball
-from models.protocol import Protocol
+from rolit.ball import Ball
+from rolit.protocol import Protocol
 
 class Board(object):
     DIM = 8

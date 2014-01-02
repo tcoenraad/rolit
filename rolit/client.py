@@ -1,8 +1,8 @@
-from models.board import Board
+from rolit.board import Board
 
-from models.protocol import Protocol
-from models.protocol_extended import ProtocolExtended
-from models.helpers import Helpers
+from rolit.protocol import Protocol
+from rolit.protocol_extended import ProtocolExtended
+from rolit.helpers import Helpers
 
 class Client(object):
 

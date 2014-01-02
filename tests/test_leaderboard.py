@@ -1,8 +1,8 @@
 import pytest
 import datetime
 
-from models.leaderboard import *
-from models.protocol import Protocol
+from rolit.leaderboard import *
+from rolit.protocol import Protocol
 
 class TestLeaderboard(object):
     def setup_method(self, method):

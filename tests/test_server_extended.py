@@ -1,7 +1,7 @@
 import pytest
 from mock import Mock, call, patch
 
-from models.server import *
+from rolit.server import *
 
 @patch.object(random, 'shuffle', Mock())
 class TestServer():

@@ -1,7 +1,7 @@
-from models.games import *
-from models.game import *
-from models.board import *
-from models.ball import Ball
+from rolit.games import *
+from rolit.game import *
+from rolit.board import *
+from rolit.ball import Ball
 
 import pytest
 
