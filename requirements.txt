@@ -1,5 +1,5 @@
 termcolor
 pytest
-pytest-coverage
+pytest-cov
 pytest-xdist
 mock
