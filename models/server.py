@@ -83,11 +83,11 @@ class Server(object):
 
     def place(self, client, coord):
         try:
-            try:
-                network_game = self.network_games[client['game_id']]
-            except KeyError:
-                raise ClientError("Client is not in-game, refer to protocol")
+            network_game = self.network_games[client['game_id']]
+        except KeyError:
+            raise ClientError("Client is not in-game, refer to protocol")
 
+        try:
             try:
                 x = int(coord[0])
                 y = int(coord[1])
@@ -109,8 +109,7 @@ class Server(object):
 
             network_game['clients'][network_game['game'].current_player]['socket'].send("%s%s" % (Protocol.PLAY, Protocol.EOL))
         except (ClientError, GameOverError) as e:
-            if 'network_game' in locals():
-                self.game_over(network_game)
+            self.game_over(network_game)
             if isinstance(e, ClientError):
                 raise e
 
@@ -127,6 +126,7 @@ class Server(object):
                 else:
                     self.leaderboard.add_score(client['name'], datetime.datetime.now(), 0)
                 del(client['game_id'])
+        del self.network_games[id(network_game['game'])]
 
     def chat(self, sender, message):
         if not sender['chat']:
@@ -148,12 +148,12 @@ class Server(object):
         if challenger['name'] in self.challenge_list:
             self.remove_challenge(challenger['name'])
 
+        if len(challenged_names) > 3:
+            raise ClientError("You challenged more than 3 players, refer to the protocol")
+
         challenged_clients = [self.get_client(challengee) for challengee in challenged_names]
         if challenger in challenged_clients:
             raise ClientError("You challenged yourself, what do you think?")
-
-        if len(challenged_clients) > 3:
-            raise ClientError("You challenged more than 3 players, refer to the protocol")
 
         if False in challenged_clients:
             raise ClientError("You challenged someone who does not exist")

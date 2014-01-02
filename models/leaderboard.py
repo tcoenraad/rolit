@@ -16,9 +16,6 @@ class Leaderboard(object):
         return scores_per_player
 
     def high_scores(self):
-        if len(self.scores) == 0:
-            raise NoHighScoresError("No high scores available")
-
         scores_per_player = self.scores_per_player()
         max_score = max(scores_per_player.values())
         return dict((player, score) for player, score in scores_per_player.iteritems() if score == max_score)

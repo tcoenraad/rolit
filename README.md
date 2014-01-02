@@ -25,3 +25,7 @@ Run server:
 Run tests:
 
     $ py.test
+
+Run tests with coverage:
+
+    $ py.test --cov models tests/ 

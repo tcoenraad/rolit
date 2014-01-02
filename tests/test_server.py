@@ -51,20 +51,39 @@ class TestServer():
         with pytest.raises(ClientError):
             self.server.join(self.clients[0], 'vijfendertig')
 
+    def test_it_ensures_that_a_game_goes_game_over_once(self):
+        self.server.game_over = Mock(wraps=self.server.game_over)
+
+        self.server.start_game([self.clients[0], self.clients[1]])
+        with pytest.raises(ClientError):
+            self.server.place(self.clients[0], '00')
+        with pytest.raises(ClientError):
+            self.server.place(self.clients[0], '00')
+        assert self.server.game_over.call_count == 1
+
     def test_it_validates_given_number_represents_a_field_on_board(self):
-        self.server.game_over = Mock()
+        self.server.game_over = Mock(wraps=self.server.game_over)
 
         self.server.start_game([self.clients[0], self.clients[1]])
         with pytest.raises(ClientError):
             self.server.place(self.clients[0], '-1')
+
+        self.server.start_game([self.clients[0], self.clients[1]])
         with pytest.raises(ClientError):
             self.server.place(self.clients[0], '88')
+
+        self.server.start_game([self.clients[0], self.clients[1]])
         with pytest.raises(ClientError):
             self.server.place(self.clients[0], 'ab')
+
+        self.server.start_game([self.clients[0], self.clients[1]])
         with pytest.raises(ClientError):
             self.server.place(self.clients[0], '0000')
 
-        assert self.server.game_over.call_count == 4
+        self.server.start_game([self.clients[0], self.clients[1]])
+        with pytest.raises(ClientError):
+            self.server.place(self.clients[0], '33')
+        assert self.server.game_over.call_count == 5
 
     def test_it_validates_client_is_in_game(self):
         with pytest.raises(ClientError):
@@ -121,26 +140,26 @@ class TestServer():
         with pytest.raises(ClientError):
             self.server.challenge(self.clients[0], "%s" % (self.clients[0]['name']))
 
-    def test_challenge_with_to_many_people(self):
+    def test_challenge_with_too_many_people(self):
         with pytest.raises(ClientError):
-            self.server.challenge(self.clients[0], "%s %s %s %s" % ("a", "b", "c", "d"))
+            self.server.challenge(self.clients[0], "a", "b", "c", "d")
 
     def test_challenge_when_challengee_disabled_challenges(self):
         with pytest.raises(ClientError):
-            self.server.challenge(self.clients[0], "%s" % (self.clients[2]['name']))
+            self.server.challenge(self.clients[0], self.clients[2]['name'])
 
     def test_challenge_when_challenger_disabled_challenges(self):
         with pytest.raises(ClientError):
-            self.server.challenge(self.clients[2], "%s" % (self.clients[0]['name']))
+            self.server.challenge(self.clients[2], self.clients[0]['name'])
 
     def test_challenge_someone_that_does_not_exist(self):
         with pytest.raises(ClientError):
-            self.server.challenge(self.clients[0], "%s" % ("W.A. van Buren"))
+            self.server.challenge(self.clients[0], "W.A. van Buren")
 
     def test_challenge_someone_that_is_already_challenged(self):
-        self.server.challenge(self.clients[0], "%s" % (self.clients[1]['name']))
+        self.server.challenge(self.clients[0], self.clients[1]['name'])
         with pytest.raises(AlreadyChallengedError):
-            self.server.challenge(self.clients[4], "%s" % (self.clients[1]['name']))
+            self.server.challenge(self.clients[4], self.clients[1]['name'])
 
     def test_challenge_requests(self):
         self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
@@ -159,6 +178,10 @@ class TestServer():
 
         args = call("%s %s %s%s" % (Protocol.CHALLENGE, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL))
         self.clients[1]['socket'].send.assert_has_calls(args)
+
+    def test_challenge_response_when_not_challenged(self):
+        with pytest.raises(ClientError):
+            self.server.challenge_response(self.clients[1], Protocol.TRUE)
 
     def test_challenge_request_accepted(self):
         self.server.start_game = Mock()
@@ -316,6 +339,14 @@ class TestServer():
         args.pop(3)
         self.clients[3]['socket'].send.assert_has_calls(args)
         assert self.clients[4]['socket'].send.call_count == 1
+
+    def test_it_validates_timestamp_for_date_stats(self):
+        with pytest.raises(ClientError):
+            self.server.stats(self.clients[0], Protocol.STAT_DATE, 'Inter-Actief')
+
+    def test_it_validates_requested_stat(self):
+        with pytest.raises(ClientError):
+            self.server.stats(self.clients[0], Protocol.STAT_PLAYER + '...', self.clients[0]['name'])
 
     def test_it_gives_the_right_date_stats(self):
         game = self.server.start_game([self.clients[0], self.clients[1]])
