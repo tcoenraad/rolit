@@ -1,7 +1,7 @@
 import random, datetime
 
 from rolit.games import TwoPlayerGame, ThreePlayerGame, FourPlayerGame
-from rolit.game import Game, GameOverError
+from rolit.game import GameOverError
 from rolit.board import Board, BoardError
 from rolit.protocol import Protocol
 from rolit.protocol_extended import ProtocolExtended
@@ -9,6 +9,7 @@ from rolit.protocol_extended import ProtocolExtended
 from rolit.leaderboard import Leaderboard, NoHighScoresError
 
 class Server(object):
+
     def __init__(self):
         self.leaderboard = Leaderboard()
         self.clients = []
@@ -37,6 +38,10 @@ class Server(object):
 
     def disconnect(self, client):
         self.clients.remove(client)
+
+        for clients in self.join_list.values():
+            if client in clients:
+                clients.remove(client)
 
         if 'game_id' in client:
             self.game_over(self.network_games[client['game_id']])

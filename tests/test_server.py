@@ -25,6 +25,18 @@ class TestServer():
 
         socket.send.assert_called_once_with("%s %s %s%s" % (Protocol.GREET, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
 
+    def test_it_disconnects(self):
+        self.server.start_game = Mock()
+
+        self.server.join(self.clients[0], '2')
+        self.server.disconnect(self.clients[0])
+        self.server.join(self.clients[1], '2')
+        assert self.server.start_game.call_count == 0
+
+        self.server.join(self.clients[2], '2')
+        assert self.server.start_game.call_count == 1
+
+
     def test_it_overwrite_joins(self):
         self.server.start_game = Mock()
 
