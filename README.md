@@ -28,4 +28,4 @@ Run tests:
 
 Run tests with coverage:
 
-    $ py.test --cov models tests/ 
+    $ py.test --cov rolit tests/ 
