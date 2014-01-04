@@ -132,14 +132,16 @@ class TestServer():
 
     def test_chat_when_enabled_and_in_game(self):
         self.server.start_game([self.clients[0], self.clients[1]])
-        self.server.chat(self.clients[0], "This is a test message")
-        self.server.chat(self.clients[2], "This is a second test message")
+        self.server.chat(self.clients[0], "This is a test message and it is my turn")
+        self.server.chat(self.clients[1], "This is a test message and it is not my turn")
+        self.server.chat(self.clients[2], "This is a test message and I am not in game")
 
-        args = call("%s %s %s%s" % (Protocol.CHAT, self.clients[0]['name'], "This is a test message", Protocol.EOL))
+        args = [call("%s %s %s%s" % (Protocol.CHAT, self.clients[0]['name'], "This is a test message and it is my turn", Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHAT, self.clients[1]['name'], "This is a test message and it is not my turn", Protocol.EOL))]
         self.clients[0]['socket'].send.assert_has_calls(args)
         self.clients[1]['socket'].send.assert_has_calls(args)
 
-        args = call("%s %s %s%s" % (Protocol.CHAT, self.clients[2]['name'], "This is a second test message", Protocol.EOL))
+        args = call("%s %s %s%s" % (Protocol.CHAT, self.clients[2]['name'], "This is a test message and I am not in game", Protocol.EOL))
         self.clients[2]['socket'].send.assert_has_calls(args)
         assert self.clients[3]['socket'].send.call_count == 1
         assert self.clients[4]['socket'].send.call_count == 1
