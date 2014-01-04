@@ -201,14 +201,14 @@ class Server(object):
                     raise ClientError("Given argument `%s` cannot be converted to a floating point" % arg)
 
                 score = self.leaderboard.best_score_of_date(datetime.datetime.fromtimestamp(time))
-                client['socket'].send("%s %s %s %s %s%s" % (Protocol.STAT, stat, arg, score.name, score.score, Protocol.EOL))
+                client['socket'].send("%s %s %s %s %s%s" % (Protocol.STATS, stat, arg, score.name, score.score, Protocol.EOL))
             elif stat == Protocol.STAT_PLAYER:
                 score = self.leaderboard.best_score_of_player(arg)
-                client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, score.score, Protocol.EOL))
+                client['socket'].send("%s %s %s %s%s" % (Protocol.STATS, stat, arg, score.score, Protocol.EOL))
             else:
                 raise ClientError("Given stat `%s` is not recognized, refer to protocol" % stat)
         except NoHighScoresError:
-            client['socket'].send("%s %s %s %s%s" % (Protocol.STAT, stat, arg, Protocol.UNDEFINED, Protocol.EOL))
+            client['socket'].send("%s %s %s %s%s" % (Protocol.STATS, stat, arg, Protocol.UNDEFINED, Protocol.EOL))
 
     def send_games(self, client):
         game_ids = [str(game) for game in self.network_games.keys()]

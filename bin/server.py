@@ -2,8 +2,9 @@ import socket
 import sys
 import threading
 
-from rolit.server import *
+from rolit.server import Server, ServerError, ClientError
 from rolit.protocol import Protocol
+from rolit.protocol_extended import ProtocolExtended
 from rolit.helpers import Helpers
 
 router = {
@@ -14,10 +15,10 @@ router = {
     Protocol.CHALLENGE : { 'args' : 2, 'method' : 'challenge' },
     Protocol.CHALLENGE : { 'args' : 3, 'method' : 'challenge' },
     Protocol.CHALLENGE_RESPONSE : { 'args' : 1, 'method' : 'challenge_response' },
-    Protocol.STAT : { 'args' : 2, 'method' : 'stats' },
-    ProtocolExtended.GAMES: { 'args' : 0, 'method' : 'send_games'},
-    ProtocolExtended.GAME_PLAYERS : { 'args' : 1, 'method' : 'send_game_players'},
-    ProtocolExtended.GAME_BOARD : { 'args' : 1, 'method' : 'send_game_board'}
+    Protocol.STATS : { 'args' : 2, 'method' : 'stats' },
+    ProtocolExtended.GAMES : { 'args' : 0, 'method' : 'send_games' },
+    ProtocolExtended.GAME_PLAYERS : { 'args' : 1, 'method' : 'send_game_players' },
+    ProtocolExtended.GAME_BOARD : { 'args' : 1, 'method' : 'send_game_board' }
 }
 
 class ClientHandler(threading.Thread):
@@ -47,11 +48,13 @@ class ClientHandler(threading.Thread):
             Helpers.notice('Client %s introduced itself as `%s`' % (self.client_address, self.name))
 
             while True:
-                data = self.socket.recv(4096).strip().split(Protocol.SEPARATOR)
-
-                Helpers.log("`%s`: `%s`" % (self.name, data))
+                response = self.socket.recv(4096).strip()
                 if not data:
                     break
+
+                data = response.split(Protocol.SEPARATOR)
+
+                Helpers.log("`%s`: `%s`" % (self.name, data))
                 try:
                     route = router[data[0]]
                     if not route['args'] == len(data) - 1:
@@ -68,10 +71,10 @@ class ClientHandler(threading.Thread):
                     raise ClientError('Invalid command `%s`, refer to protocol' % data)
         except ServerError as e:
             Helpers.error('500 Internal Server Error: `%s`' % e)
-            self.socket.send('500 Internal Server Error: `%s`%s' % (e, Protocol.EOL))
+            self.socket.send('%s 500 Internal Server Error: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except ClientError as e:
             Helpers.warning('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
-            self.socket.send('400 Bad Request: `%s`%s' % (e, Protocol.EOL))
+            self.socket.send('%s 400 Bad Request: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except IOError:
             Helpers.warning('Connection error with %s' % self.name)
         finally:
