@@ -4,7 +4,6 @@ import threading
 
 from rolit.server import Server, ServerError, ClientError
 from rolit.protocol import Protocol
-from rolit.protocol_extended import ProtocolExtended
 from rolit.helpers import Helpers
 
 class ClientHandler(threading.Thread):

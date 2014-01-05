@@ -4,6 +4,7 @@ from rolit.games import TwoPlayerGame, ThreePlayerGame, FourPlayerGame
 from rolit.game import GameOverError
 from rolit.board import Board, BoardError
 from rolit.protocol import Protocol
+from rolit.protocol_extended import ProtocolExtended
 
 from rolit.leaderboard import Leaderboard, NoHighScoresError
 
