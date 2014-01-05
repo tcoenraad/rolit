@@ -87,8 +87,7 @@ class Client(object):
 
         @staticmethod
         def game_board(board):
-            print("The board for game `%s` looks like:" % game_id)
-            board = self.response().split(Protocol.SEPARATOR)
+            print("The board for game `%s` looks like:" % board[0])
             print Board.decode(Protocol.SEPARATOR.join(board[1:]))
 
         @staticmethod
