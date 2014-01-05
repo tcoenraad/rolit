@@ -2,4 +2,5 @@ termcolor
 pytest
 pytest-cov
 pytest-xdist
+parsedatetime
 mock
