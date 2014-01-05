@@ -1,7 +1,6 @@
 import copy
 import time
 import datetime
-import sys
 import parsedatetime.parsedatetime as pdt
 
 from rolit.game import GameOverError
@@ -35,7 +34,7 @@ class Client(object):
             print("Oops, that is an error!")
             print("`%s`" % message)
 
-        def play(self, players):
+        def play(self):
             if self.client.auto_fire == True:
                 self.client.ai()
             else:

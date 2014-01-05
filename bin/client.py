@@ -24,7 +24,10 @@ class ServerHandler(threading.Thread):
             for line in lines:
                 data = line.split(Protocol.SEPARATOR)
                 try:
-                    getattr(self.client.router, Client.Router.routes[data[0]]['method'])(data[1:])
+                    if len(data) == 1:
+                        getattr(self.client.router, Client.Router.routes[data[0]]['method'])()
+                    else:
+                        getattr(self.client.router, Client.Router.routes[data[0]]['method'])(data[1:])
                 except KeyError:
                     self.client.Router.error(line)
 
