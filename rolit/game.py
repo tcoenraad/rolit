@@ -12,7 +12,7 @@ class Game(object):
         self.board.board[Board.DIM/2 - 1][Board.DIM/2 - 1] = Ball(Ball.RED)
         self.board.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.BLUE)
 
-        self.balls_left = Board.DIM * Board.DIM - player_amount
+        self.balls_left = Board.DIM * Board.DIM - 4
         self.player_amount = player_amount
 
         self.current_player = 0
