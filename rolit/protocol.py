@@ -26,3 +26,10 @@ class Protocol(object):
     FALSE        = '0'
     UNDEFINED    = '-1'
     ERROR        = 'error'
+
+    @staticmethod
+    def coord_str(coord):
+        coord_str = str(coord)
+        x = int(coord_str[0])
+        y = int(coord_str[1])
+        return (x, y)

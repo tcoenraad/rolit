@@ -7,20 +7,6 @@ from rolit.protocol import Protocol
 from rolit.protocol_extended import ProtocolExtended
 from rolit.helpers import Helpers
 
-router = {
-    Protocol.JOIN : { 'args' : 1, 'method' : 'join' },
-    Protocol.PLACE : { 'args' : 1, 'method' : 'place' },
-    Protocol.CHAT : { 'args' : 1, 'method' : 'chat' },
-    Protocol.CHALLENGE : { 'args' : 1, 'method' : 'challenge' },
-    Protocol.CHALLENGE : { 'args' : 2, 'method' : 'challenge' },
-    Protocol.CHALLENGE : { 'args' : 3, 'method' : 'challenge' },
-    Protocol.CHALLENGE_RESPONSE : { 'args' : 1, 'method' : 'challenge_response' },
-    Protocol.STATS : { 'args' : 2, 'method' : 'stats' },
-    ProtocolExtended.GAMES : { 'args' : 0, 'method' : 'send_games' },
-    ProtocolExtended.GAME_PLAYERS : { 'args' : 1, 'method' : 'send_game_players' },
-    ProtocolExtended.GAME_BOARD : { 'args' : 1, 'method' : 'send_game_board' }
-}
-
 class ClientHandler(threading.Thread):
 
     def __init__(self, server, sock, client_address):
@@ -32,8 +18,11 @@ class ClientHandler(threading.Thread):
 
     def run(self):
         try:
-            data = self.socket.recv(4096).strip().split(Protocol.SEPARATOR)
-            Helpers.log("`%s`: `%s`" % (self.name, data))
+            line = self.socket.recv(4096).strip()
+
+            Helpers.log("`%s`: `%s`" % (self.name, line))
+
+            data = line.split(Protocol.SEPARATOR)
 
             # before everything else, greet
             if not data[0] == Protocol.GREET or not data[1]:
@@ -48,15 +37,15 @@ class ClientHandler(threading.Thread):
             Helpers.notice('Client %s introduced itself as `%s`' % (self.client_address, self.name))
 
             while True:
-                response = self.socket.recv(4096).strip()
-                if not data:
+                line = self.socket.recv(4096).strip()
+                if not line:
                     break
 
-                data = response.split(Protocol.SEPARATOR)
+                Helpers.log("`%s`: `%s`" % (self.name, line))
 
-                Helpers.log("`%s`: `%s`" % (self.name, data))
+                data = line.split(Protocol.SEPARATOR)
                 try:
-                    route = router[data[0]]
+                    route = self.server.router[data[0]]
                     if not route['args'] == len(data) - 1:
                         break
                     if route['args'] == 0:

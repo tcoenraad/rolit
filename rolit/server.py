@@ -10,6 +10,20 @@ from rolit.leaderboard import Leaderboard, NoHighScoresError
 
 class Server(object):
 
+    router = {
+        Protocol.JOIN : { 'args' : 1, 'method' : 'join' },
+        Protocol.PLACE : { 'args' : 1, 'method' : 'place' },
+        Protocol.CHAT : { 'args' : 1, 'method' : 'chat' },
+        Protocol.CHALLENGE : { 'args' : 1, 'method' : 'challenge' },
+        Protocol.CHALLENGE : { 'args' : 2, 'method' : 'challenge' },
+        Protocol.CHALLENGE : { 'args' : 3, 'method' : 'challenge' },
+        Protocol.CHALLENGE_RESPONSE : { 'args' : 1, 'method' : 'challenge_response' },
+        Protocol.STATS : { 'args' : 2, 'method' : 'stats' },
+        ProtocolExtended.GAMES : { 'args' : 0, 'method' : 'send_games' },
+        ProtocolExtended.GAME_PLAYERS : { 'args' : 1, 'method' : 'send_game_players' },
+        ProtocolExtended.GAME_BOARD : { 'args' : 1, 'method' : 'send_game_board' }
+    }
+
     def __init__(self):
         self.leaderboard = Leaderboard()
         self.clients = []
@@ -94,8 +108,7 @@ class Server(object):
 
         try:
             try:
-                x = int(coord[0])
-                y = int(coord[1])
+                x, y = Protocol.coord_str(coord)
             except ValueError:
                 raise ClientError("Given coordinate `%s` is not an integer, refer to protocol" % coord)
 
