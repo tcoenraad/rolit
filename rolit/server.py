@@ -40,7 +40,7 @@ class Server(object):
                    'chat' : chat == Protocol.TRUE,
                    'challenge' : challenge == Protocol.TRUE }
         self.clients.append(client)
-        client['socket'].send("%s %s %s%s" % (Protocol.GREET, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
+        client['socket'].send("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
 
         return client
 

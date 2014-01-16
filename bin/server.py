@@ -23,8 +23,8 @@ class ClientHandler(threading.Thread):
 
             data = line.split(Protocol.SEPARATOR)
 
-            # before everything else, greet
-            if not data[0] == Protocol.GREET or not data[1]:
+            # before everything else, HANDSHAKE
+            if not data[0] == Protocol.HANDSHAKE or not data[1]:
                 return
 
             if len(data) == 2:

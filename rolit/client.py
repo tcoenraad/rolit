@@ -15,7 +15,7 @@ class Client(object):
 
     class Router(object):
 
-        routes = { Protocol.GREET : { 'method' : 'greet' },
+        routes = { Protocol.HANDSHAKE : { 'method' : 'HANDSHAKE' },
                    Protocol.START : { 'method' : 'start' },
                    Protocol.PLAY : { 'method' : 'play' },
                    Protocol.PLACE : { 'method' : 'place' },
@@ -70,7 +70,7 @@ class Client(object):
             print(self.client.game.board)
 
         @staticmethod
-        def greet(options):
+        def HANDSHAKE(options):
             print("Connected established")
             print("Chat = %s and challenge = %s" % (options[0] == Protocol.TRUE, options[1] == Protocol.TRUE))
 

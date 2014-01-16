@@ -23,7 +23,7 @@ class TestServer():
         socket = Mock()
         self.server.connect(socket, "Bestuur_35", Protocol.TRUE, Protocol.FALSE)
 
-        socket.send.assert_called_once_with("%s %s %s%s" % (Protocol.GREET, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
+        socket.send.assert_called_once_with("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
 
     def test_it_disconnects(self):
         self.server.start_game = Mock()

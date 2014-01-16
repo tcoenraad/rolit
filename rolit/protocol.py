@@ -1,14 +1,14 @@
 class Protocol(object):
     
-    GREET              = 'greet'
-    JOIN               = 'join'
-    START              = 'start'
+    HANDSHAKE          = 'hello'
+    JOIN               = 'joinGame'
+    START              = 'startGame'
     PLAY               = 'play'
     PLACE              = 'place'
     GAME_OVER          = 'game_over'
     CHAT               = 'chat'
     CHALLENGE          = 'challenge'
-    CHALLENGE_RESPONSE = 'challenge_response'
+    CHALLENGE_RESPONSE = 'challengeResponse'
     CHALLENGE_REJECTED = 'challenge_rejected'
 
     RED          = 'red'
@@ -16,9 +16,9 @@ class Protocol(object):
     BLUE         = 'blue'
     GREEN        = 'green'
 
-    STATS        = 'stats'
-    STAT_DATE    = 'stat_date'
-    STAT_PLAYER  = 'stat_player'
+    STATS        = 'highscore'
+    STAT_DATE    = 'date'
+    STAT_PLAYER  = 'player'
 
     SEPARATOR    = ' '
     EOL          = "\r\n"
