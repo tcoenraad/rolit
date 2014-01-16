@@ -13,6 +13,7 @@ Requirements
 How to set-up
 =============
 
+    $ sudo apt-get install python-m2crypto
     $ sudo pip install -r requirements.txt
 
 How to run
