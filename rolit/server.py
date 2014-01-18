@@ -1,18 +1,23 @@
+from base64 import b64decode
 import random, datetime
+import hashlib
+
+from rolit.helpers import Helpers
 
 from rolit.games import TwoPlayerGame, ThreePlayerGame, FourPlayerGame
 from rolit.game import GameOverError
 from rolit.board import Board, BoardError
 from rolit.protocol import Protocol
 from rolit.protocol_extended import ProtocolExtended
-
 from rolit.leaderboard import Leaderboard, NoHighScoresError
 
 class Server(object):
 
     router = {
-        Protocol.JOIN : { 'args' : 1, 'method' : 'join' },
-        Protocol.PLACE : { 'args' : 1, 'method' : 'place' },
+        Protocol.CREATE_GAME : { 'args' : 0, 'method' : 'create_game' },
+        Protocol.START_GAME : { 'args' : 0, 'method' : 'start_game' },
+        Protocol.JOIN_GAME : { 'args' : 1, 'method' : 'join_game' },
+        Protocol.MOVE : { 'args' : 2, 'method' : 'move' },
         Protocol.CHAT : { 'args' : 1, 'method' : 'chat' },
         Protocol.CHALLENGE : { 'args' : 1, 'method' : 'challenge' },
         Protocol.CHALLENGE : { 'args' : 2, 'method' : 'challenge' },
@@ -28,21 +33,8 @@ class Server(object):
         self.leaderboard = Leaderboard()
         self.clients = []
         self.network_games = {}
-        self.join_list = { 2 : [], 3 : [], 4 : [] }
+        self.lobbies = {}
         self.challenge_list = {}
-
-    def connect(self, socket, name, chat = Protocol.FALSE, challenge = Protocol.FALSE):
-        if self.get_client(name):
-            raise ServerError("Given name is already in use")
-
-        client = { 'socket' : socket,
-                   'name' : name,
-                   'chat' : chat == Protocol.TRUE,
-                   'challenge' : challenge == Protocol.TRUE }
-        self.clients.append(client)
-        client['socket'].send("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.TRUE, Protocol.TRUE, Protocol.EOL))
-
-        return client
 
     def get_client(self, name):
         for client in self.clients:
@@ -50,38 +42,90 @@ class Server(object):
                 return client
         return False
 
+    def connect(self, socket, name, supported = Protocol.BAREBONE):
+        if self.get_client(name):
+            raise ServerError("Given name is already in use")
+
+        client = { 'socket' : socket,
+                   'name' : name,
+                   'chat' : supported == Protocol.CHAT or supported == Protocol.CHAT_AND_CHALLENGE,
+                   'challenge' : supported == Protocol.CHALLENGE or supported == Protocol.CHAT_AND_CHALLENGE }
+        self.clients.append(client)
+
+
+        for (lobby, clients) in self.lobbies.items():
+            client['socket'].send("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.FALSE, len(clients), Protocol.EOL))
+
+        self.broadcast("%s %s %s%s" % (Protocol.ONLINE, name, Protocol.TRUE, Protocol.EOL))
+        if client['challenge']:
+            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL), 'challenge')
+
+        return client
+
     def disconnect(self, client):
         self.clients.remove(client)
 
-        for clients in self.join_list.values():
-            if client in clients:
+        for (lobby, clients) in self.lobbies.items():
+            if lobby == client['name']:
+                del(self.lobbies[lobby])
+                self.broadcast("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.UNDEFINED, len(clients), Protocol.EOL))
+            elif client in clients:
                 clients.remove(client)
+                self.broadcast("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.FALSE, len(clients), Protocol.EOL))
 
         if 'game_id' in client:
             self.game_over(self.network_games[client['game_id']])
 
-    def join(self, client, number_of_players):
-        try:
-            number_of_players = int(number_of_players)
-        except ValueError:
-            raise ClientError("Given number is not a number")
 
-        if number_of_players < 2 or number_of_players > 4:
-            raise ClientError("A game is played with 2 to 4 players")
+    def broadcast(self, msg, supported=""):
+        for client in self.clients:
+            if supported == "" or client[supported]:
+                client['socket'].send(msg)
 
-        for clients in self.join_list.values():
+    def create_game(self, client):
+        if client['name'] in self.lobbies:
+            raise ClientError("You have already created a game")
+        for clients in self.lobbies.values():
             if client in clients:
-                clients.remove(client)
+                raise ClientError("You have already joined a game")
 
-        clients = self.join_list[number_of_players]
+        clients = self.lobbies[client['name']] = [ client ]
+        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, client['name'], Protocol.FALSE, len(clients), Protocol.EOL))
+
+    def join_game(self, client, name):
+        try:
+            clients = self.lobbies[name]
+        except KeyError:
+            raise ClientError("Given client does not exist")
+
+        if client in clients:
+            raise ClientError("You have already joined a game")
+
+        if len(clients) == 4:
+            raise ClientError("Given name points to a full game lobby")
+
         clients.append(client)
 
-        if len(clients) == number_of_players:
-            random.shuffle(clients)
-            self.start_game(clients)
-            self.join_list[number_of_players] = []
+        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, name, Protocol.FALSE, len(clients), Protocol.EOL))
 
-    def start_game(self, clients):
+    def start_game(self, creator):
+        try:
+            clients = self.lobbies[creator['name']]
+        except KeyError:
+            raise ClientError("You have not created a game")
+
+        if len(clients) == 1:
+            raise ClientError("You cannot start a game with only one player")
+
+        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, creator['name'], Protocol.TRUE, len(clients), Protocol.EOL))
+        del(self.lobbies[creator['name']])
+
+        return self.initiate_game(clients)
+
+    def start_challenge_game(self, clients):
+        return self.initiate_game(clients)
+
+    def initiate_game(self, clients):
         if len(clients) == 2:
             game = TwoPlayerGame()
         elif len(clients) == 3:
@@ -90,17 +134,18 @@ class Server(object):
             game = FourPlayerGame()
 
         game_id = id(game)
+        random.shuffle(clients)
         self.network_games[game_id] = { 'clients' : clients, 'game' : game }
 
         for client in clients:
             client['game_id'] = game_id
             client['socket'].send("%s %s%s" % (Protocol.START, ' '.join(c['name'] for c in clients), Protocol.EOL))
 
-        clients[0]['socket'].send("%s%s" % (Protocol.PLAY, Protocol.EOL))
+        clients[0]['socket'].send("%s%s" % (Protocol.MOVE, Protocol.EOL))
 
         return game
 
-    def place(self, client, coord):
+    def move(self, client, x, y):
         try:
             network_game = self.network_games[client['game_id']]
         except KeyError:
@@ -108,24 +153,25 @@ class Server(object):
 
         try:
             try:
-                x, y = Protocol.coord_str(coord)
+                x = int(x)
+                y = int(y)
             except ValueError:
-                raise ClientError("Given coordinate `%s` is not an integer, refer to protocol" % coord)
+                raise ClientError("Given coordinate `(%s, %s)` is not an integer, refer to protocol" % (x, y))
 
-            if len(coord) > 2 or x < 0 or x >= Board.DIM or y < 0 or y >= Board.DIM:
-                raise ClientError("Given coordinate `%s` does not exist on board, refer to protocol" % coord)
+            if x < 0 or x >= Board.DIM or y < 0 or y >= Board.DIM:
+                raise ClientError("Given coordinate `(%s, %s)` does not exist on board, refer to protocol" % (x, y))
 
             if network_game['game'].current_player != network_game['clients'].index(client):
                 raise ClientError("Client is not current player of game, refer to protocol")
 
             for client in network_game['clients']:
-                client['socket'].send("%s %s%s%s" % (Protocol.PLACE, x, y, Protocol.EOL))
+                client['socket'].send("%s %s %s%s" % (Protocol.MOVED, x, y, Protocol.EOL))
             try:
                 network_game['game'].place(x, y)
             except BoardError:
                 raise ClientError("Given coordinate `%s` is not a valid move on the current board")
 
-            network_game['clients'][network_game['game'].current_player]['socket'].send("%s%s" % (Protocol.PLAY, Protocol.EOL))
+            network_game['clients'][network_game['game'].current_player]['socket'].send("%s%s" % (Protocol.MOVE, Protocol.EOL))
         except (ClientError, GameOverError) as e:
             self.game_over(network_game)
             if isinstance(e, ClientError):
@@ -139,7 +185,7 @@ class Server(object):
 
                 client['socket'].send("%s %s%s" % (Protocol.GAME_OVER, ' '.join(client['name'] for client in winning_clients), Protocol.EOL))
 
-                if client in winning_clients:
+                if client in winning_clients and 'verified' in client:
                     self.leaderboard.add_score(client['name'], datetime.datetime.now(), 1)
                 else:
                     self.leaderboard.add_score(client['name'], datetime.datetime.now(), 0)
@@ -179,22 +225,27 @@ class Server(object):
         if False in [challenged_client['challenge'] for challenged_client in challenged_clients]:
             raise ClientError("You challenged someone who does not support challenges")
 
-        all_challengees = [item for sublist in [challenge.keys() for challenge in self.challenge_list.values()] for item in sublist]
+        if True in ['game_id' in challenged_client for challenged_client in challenged_clients]:
+            raise ClientError("You challenged someone who already is in game")
+
+        all_challengees = [item for sublist in self.challenge_list.values() for item in sublist]
         if len(list(set(all_challengees) & set(challenged_names))) > 0:
             raise AlreadyChallengedError("You challenged someone who already is in challenge")
 
         self.challenge_list[challenger['name']] = { challenger['name'] : True }
+        self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenger['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
         for challenged_client in challenged_clients:
             self.challenge_list[challenger['name']][challenged_client['name']] = False
             challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
+            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.FALSE, Protocol.EOL), 'challenge')
 
     def challenge_response(self, challengee, response):
-        for challenge, challengees in self.challenge_list.iteritems():
+        for (challenge, challengees) in self.challenge_list.iteritems():
             if challengee['name'] in challengees:
                 if response == Protocol.TRUE:
                     challengees[challengee['name']] = True
                     if all(challengees.values()):
-                        self.start_game([self.get_client(client_name) for client_name in challengees])
+                        self.start_challenge_game([self.get_client(client_name) for client_name in challengees])
                 elif response == Protocol.FALSE:
                     self.remove_challenge(challenge)
                 return
@@ -202,18 +253,22 @@ class Server(object):
 
     def remove_challenge(self, challenger):
         for challengee in self.challenge_list[challenger]:
-            self.get_client(challengee)['socket'].send("%s%s" % (Protocol.CHALLENGE_REJECTED, Protocol.EOL))
+            self.get_client(challengee)['socket'].send("%s %s%s" % (Protocol.CHALLENGE_RESPONSE, Protocol.FALSE, Protocol.EOL))
+            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.TRUE, Protocol.EOL), 'challenge')
         del(self.challenge_list[challenger])
 
     def stats(self, client, stat, arg):
         try:
             if stat == Protocol.STAT_DATE:
                 try:
-                    time = float(arg)
+                    date = arg.split("-")
+                    if not len(date) == 3:
+                        raise ClientError("Given argument `%s` is malformed, refer to protocol" % date)
+                    date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
                 except ValueError:
-                    raise ClientError("Given argument `%s` cannot be converted to a floating point" % arg)
+                    raise ClientError("Given argument `%s` cannot be converted to a valid date" % arg)
 
-                score = self.leaderboard.best_score_of_date(datetime.datetime.fromtimestamp(time))
+                score = self.leaderboard.best_score_of_date(date)
                 client['socket'].send("%s %s %s %s %s%s" % (Protocol.STATS, stat, arg, score.name, score.score, Protocol.EOL))
             elif stat == Protocol.STAT_PLAYER:
                 score = self.leaderboard.best_score_of_player(arg)

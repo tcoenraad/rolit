@@ -48,6 +48,7 @@ class Helpers(object):
 
         sock.connect(('ss-security.student.utwente.nl', 2013))
         sock.send("%s %s%s" % ("PUBLICKEY", player_name, Protocol.EOL))
+        # assert 0
         response = sock.recv(4096)
 
         if not response:
