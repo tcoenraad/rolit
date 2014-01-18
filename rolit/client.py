@@ -35,7 +35,7 @@ class Client(object):
             print("`%s`" % message)
 
         def play(self):
-            if self.client.auto_fire == True:
+            if self.client.auto_fire:
                 self.client.ai()
             else:
                 print("You may now enter a coord!")
