@@ -14,6 +14,7 @@ from rolit.leaderboard import Leaderboard, NoHighScoresError
 class Server(object):
 
     router = {
+        Protocol.AUTH : { 'args' : 1, 'method' : 'auth' },
         Protocol.CREATE_GAME : { 'args' : 0, 'method' : 'create_game' },
         Protocol.START_GAME : { 'args' : 0, 'method' : 'start_game' },
         Protocol.JOIN_GAME : { 'args' : 1, 'method' : 'join_game' },
@@ -52,6 +53,11 @@ class Server(object):
                    'challenge' : supported == Protocol.CHALLENGE or supported == Protocol.CHAT_AND_CHALLENGE }
         self.clients.append(client)
 
+        if name.startswith(Protocol.AUTH_PREFIX):
+            client['nonce'] = hashlib.sha512(str(random.random())).hexdigest()
+            client['socket'].send("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, client['nonce'], Protocol.EOL))
+        else:
+            client['socket'].send("%s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Protocol.EOL))
 
         for (lobby, clients) in self.lobbies.items():
             client['socket'].send("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.FALSE, len(clients), Protocol.EOL))
@@ -76,6 +82,14 @@ class Server(object):
         if 'game_id' in client:
             self.game_over(self.network_games[client['game_id']])
 
+    def auth(self, client, signature):
+        if 'nonce' not in client:
+            raise ClientError("You cannot authenticate yourself without a nonce")
+        if Helpers.verify_sign(client['name'], signature, client['nonce']):
+            client['verified'] = True
+            client['socket'].send("%s%s" % (Protocol.AUTH_OK, Protocol.EOL))
+        else:
+            raise ClientError("Given signature is not correct")
 
     def broadcast(self, msg, supported=""):
         for client in self.clients:
