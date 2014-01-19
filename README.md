@@ -9,11 +9,11 @@ a Rolit server for softwaresystemen - Python edition
 Requirements
 ============
 - Install [pip](http://www.pip-installer.org/en/latest/installing.html)
+- For [pycrypto](https://pypi.python.org/pypi/pycrypto) you need, depending on your OS, `python-dev`
 
 How to set-up
 =============
 
-    $ sudo apt-get install python-m2crypto
     $ sudo pip install -r requirements.txt
 
 How to run
