@@ -1,2 +1,4 @@
 *.pyc
 .coverage
+public_key
+private_key

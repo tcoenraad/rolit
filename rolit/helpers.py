@@ -41,13 +41,14 @@ class Helpers(object):
         from Crypto.PublicKey import RSA
         from Crypto.Signature import PKCS1_v1_5
         from Crypto.Hash import SHA
-        from base64 import b64encode, b64decode
+        from base64 import b64decode
         import socket
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         sock.connect(('ss-security.student.utwente.nl', 2013))
         sock.send("%s %s%s" % ("PUBLICKEY", player_name, Protocol.EOL))
+        # assert 0
         response = sock.recv(4096)
 
         if not response:

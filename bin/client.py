@@ -38,10 +38,12 @@ def main():
     client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
 
     port = 3535
+    name = "Monitor_%s" % random.randint(0, 3535)
     if len(sys.argv) >= 2 and sys.argv[1].isdigit():
         port = int(sys.argv[1])
+    if len(sys.argv) >= 3:
+        name = sys.argv[2]        
 
-    name = "Monitor_%s" % random.randint(0, 3535)
     client.socket.connect(('localhost', port))
 
     thread = ServerHandler(client)

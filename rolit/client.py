@@ -1,7 +1,4 @@
 import copy
-import time
-import datetime
-import parsedatetime.parsedatetime as pdt
 
 from rolit.game import GameOverError
 from rolit.games import TwoPlayerGame, ThreePlayerGame, FourPlayerGame
@@ -15,12 +12,14 @@ class Client(object):
 
     class Router(object):
 
-        routes = { Protocol.HANDSHAKE : { 'method' : 'HANDSHAKE' },
+        routes = { Protocol.ONLINE : { 'method' : 'online' },
+                   Protocol.HANDSHAKE : { 'method' : 'handshake' },
+                   Protocol.AUTH_OK : { 'method' : 'auth' },
+                   Protocol.GAME : { 'method' : 'game' },
                    Protocol.START : { 'method' : 'start' },
-                   Protocol.PLAY : { 'method' : 'play' },
-                   Protocol.PLACE : { 'method' : 'place' },
+                   Protocol.MOVE : { 'method' : 'move' },
+                   Protocol.MOVED : { 'method' : 'moved' },
                    Protocol.GAME_OVER : { 'method' : 'game_over' },
-                   Protocol.CHAT : { 'method' : 'chat' },
                    Protocol.STATS : { 'method' : 'stats' },
                    ProtocolExtended.GAMES : { 'method' : 'games' },
                    ProtocolExtended.GAME_PLAYERS : { 'method' : 'game_players' },
@@ -30,19 +29,28 @@ class Client(object):
             self.client = client
 
         @staticmethod
+        def online(status):
+            Helpers.notice("[online] `%s`: %s" %(status[0], status[1] == Protocol.TRUE))
+
+        @staticmethod
         def error(message):
             print("Oops, that is an error!")
             print("`%s`" % message)
 
-        def play(self):
-            if self.client.auto_fire == True:
+        @staticmethod
+        def game(status):
+            Helpers.notice("[game update] `%s`, with `%s` players has status: %s" %(status[0], status[2], status[1]))
+
+        def move(self):
+            if self.client.auto_fire:
                 self.client.ai()
             else:
                 print("You may now enter a coord!")
-                print("x <xy> [autofire once with `a`, enable auto_fire with `xa`, disable with `xm`]")
+                print("[x] <xy> (autofire once with [a], enable auto_fire with [xa], disable with [xm])")
 
-        def place(self, coord):
-            x, y = Protocol.coord_str(coord[0])
+        def moved(self, coord):
+            x = int(coord[0])
+            y = int(coord[1])
             print("A move is done at x=%s, y=%s" % (x, y))
             try:
                 self.client.game.place(x, y)
@@ -69,10 +77,17 @@ class Client(object):
                 self.client.game = FourPlayerGame()
             print(self.client.game.board)
 
-        @staticmethod
-        def HANDSHAKE(options):
+        def handshake(self, options):
             print("Connected established")
-            print("Chat = %s and challenge = %s" % (options[0] == Protocol.TRUE, options[1] == Protocol.TRUE))
+            print("Chat = %s and challenge = %s" % (options[0] == Protocol.CHAT or options[0] == Protocol.CHAT_AND_CHALLENGE, options[0] == Protocol.CHALLENGE or options[0] == Protocol.CHAT_AND_CHALLENGE))
+
+            if len(options) >= 2:
+                signature = Helpers.sign_data(options[1])
+                self.client.socket.send("%s %s%s" % (Protocol.AUTH, signature, Protocol.EOL))
+
+        @staticmethod
+        def auth():
+            Helpers.warning("Authentication was successful")
 
         @staticmethod
         def games(games):
@@ -87,25 +102,28 @@ class Client(object):
         @staticmethod
         def game_board(board):
             print("The board for game `%s` looks like:" % board[0])
-            print Board.decode(Protocol.SEPARATOR.join(board[1:]))
+            if not board[1] == Protocol.UNDEFINED:
+                print Board.decode(Protocol.SEPARATOR.join(board[1:]))
 
         @staticmethod
         def stats(options):
             if options[0] == Protocol.STAT_DATE:
-                print("The following player was at date `%s` best player:" % datetime.datetime.fromtimestamp(int(options[1])).strftime("%c"))
+                print("The following player was at date `%s` best player:" % options[1])
                 print(options[2:])
             
             elif options[0] == Protocol.STAT_PLAYER:
                 print("The following score was best of player `%s` best player:" % options[1])
                 print(options[2:])
 
-    options = { '0' : { 'method': 'menu', 'args': 0, 'description': "Show this help menu" },
-                '1' : { 'method': 'get_games', 'args': 0, 'description': "Get all running games" },
-                '2' : { 'method': 'get_game_players', 'args': 1, 'description': "<id> Show game players" },
-                '3' : { 'method': 'get_game_board', 'args': 1, 'description': "<id> Show game board" },
-                '4' : { 'method': 'get_stat_date', 'args': 1, 'description': "<date> Show best player on that date" },
-                '5' : { 'method': 'get_stat_player', 'args': 1, 'description': "<player> Show best score of that player" },
-                '6' : { 'method': 'join', 'args': 1, 'description': "<2-4> Join a game with that many players" },
+    options = { 'h' : { 'method': 'menu', 'args': 0, 'description': "Show this help menu" },
+                '1' : { 'method': 'create_game', 'args': 0, 'description': "Create a game" },
+                '2' : { 'method': 'join_game', 'args': 1, 'description': "<player> Join a game of that player" },
+                '3' : { 'method': 'get_games', 'args': 0, 'description': "Get all running games" },
+                '4' : { 'method': 'get_game_players', 'args': 1, 'description': "<id> Show game players" },
+                '5' : { 'method': 'get_game_board', 'args': 1, 'description': "<id> Show game board" },
+                '6' : { 'method': 'get_stat_date', 'args': 1, 'description': "<YYYY-MM-DD> Show best player on that date" },
+                '7' : { 'method': 'get_stat_player', 'args': 1, 'description': "<player> Show best score of that player" },
+                's' : { 'method': 'start_game', 'args': 0, 'hidden': True },
                 'x' : { 'method': 'place', 'args': 1, 'hidden': True },
                 'xa': { 'method': 'enable_ai', 'args': 0, 'hidden': True },
                 'xm': { 'method': 'disable_ai', 'args': 0, 'hidden': True },
@@ -136,21 +154,31 @@ class Client(object):
     def get_game_board(self, game_id):
         self.socket.send("%s %s%s" % (ProtocolExtended.GAME_BOARD, game_id[0], Protocol.EOL))
 
-    def get_stat_date(self, date_string):
-        timestamp = long(time.mktime(pdt.Calendar().parse(date_string[0])[0]))
-        self.socket.send("%s %s %s%s" % (Protocol.STATS, Protocol.STAT_DATE, str(timestamp), Protocol.EOL))
+    def get_stat_date(self, date):
+        self.socket.send("%s %s %s%s" % (Protocol.STATS, Protocol.STAT_DATE, date[0], Protocol.EOL))
 
     def get_stat_player(self, player):
         self.socket.send("%s %s %s%s" % (Protocol.STATS, Protocol.STAT_PLAYER, player[0], Protocol.EOL))
 
-    def join(self, number_of_players):
-        if int(number_of_players[0]) < 2 or int(number_of_players[0]) > 4:
-            return
-        self.socket.send("%s %s%s" % (Protocol.JOIN, number_of_players[0], Protocol.EOL))
-        print("Request sent for %s players, waiting for others to join..." % number_of_players[0])
+    def create_game(self):
+        self.socket.send("%s%s" % (Protocol.CREATE_GAME, Protocol.EOL))
+        print("Game created, wait for others to join")
+        print("Start this game with [s]")
+
+    def join_game(self, player):
+        self.socket.send("%s %s%s" % (Protocol.JOIN_GAME, player[0], Protocol.EOL))
+        print("Joined game `%s`, waiting for other to join and creator to start" % player)
+
+    def start_game(self):
+        self.socket.send("%s%s" % (Protocol.START_GAME, Protocol.EOL))
 
     def place(self, coord):
-        x, y = Protocol.coord_str(coord[0])
+        try:
+            x = int(coord[0][0])
+            y = int(coord[0][1])
+        except ValueError:
+            return
+
         game = copy.deepcopy(self.game)
         try:
             game.place(x, y)
@@ -159,7 +187,7 @@ class Client(object):
         except BoardError:
             print("The move you suggested is not valid, make another move please")
             return
-        self.socket.send("%s %s%s" % (Protocol.PLACE, coord[0], Protocol.EOL))
+        self.socket.send("%s %s %s%s" % (Protocol.MOVE, x, y, Protocol.EOL))
 
     def enable_ai(self):
         self.auto_fire = True
@@ -177,5 +205,5 @@ class Client(object):
                     pass
                 except BoardError:
                     continue
-                self.socket.send("%s %s%s" % (Protocol.PLACE, "%s%s" % (x, y), Protocol.EOL))
+                self.socket.send("%s %s %s%s" % (Protocol.MOVE, x, y, Protocol.EOL))
                 return

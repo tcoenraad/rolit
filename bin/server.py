@@ -30,7 +30,7 @@ class ClientHandler(threading.Thread):
             if len(data) == 2:
                 self.client = self.server.connect(self.socket, data[1])
             else:
-                self.client = self.server.connect(self.socket, data[1], data[2], data[3])
+                self.client = self.server.connect(self.socket, data[1], data[2])
 
             self.name = self.client['name']
             Helpers.notice('Client %s introduced itself as `%s`' % (self.client_address, self.name))
