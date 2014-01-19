@@ -14,20 +14,26 @@ class TestServer(object):
                                { 'socket' : Mock(), 'name' : "Tegel_14",              'supported' : Protocol.CHAT },
                                { 'socket' : Mock(), 'name' : "Lalala_geld",           'supported' : Protocol.BAREBONE },
                                { 'socket' : Mock(), 'name' : "IEOEDMB",               'supported' : Protocol.CHALLENGE },
-                               { 'socket' : Mock(), 'name' : "Inter-Actief",          'supported' : Protocol.BAREBONE }]
+                               { 'socket' : Mock(), 'name' : "Inter-Actief",          'supported' : Protocol.CHAT_AND_CHALLENGE }]
 
         self.clients = []
         for client in self.mocked_clients:
             self.clients.append(self.server.connect(client['socket'], client['name'], client['supported']))
 
     def start_game_with_two_players(self):
-        self.server.lobbies = { self.clients[0]['name'] : [self.clients[0], self.clients[1]] }
+        self.server.create_game(self.clients[0])
+        self.server.join_game(self.clients[1], self.clients[0]['name'])
         return self.server.start_game(self.clients[0])
 
     def start_game_with_three_players(self):
-        self.server.lobbies = { self.clients[0]['name'] : [self.clients[0], self.clients[1], self.clients[2]] }
+        self.server.create_game(self.clients[0])
+        self.server.join_game(self.clients[1], self.clients[0]['name'])
+        self.server.join_game(self.clients[2], self.clients[0]['name'])
         return self.server.start_game(self.clients[0])
 
     def start_game_with_four_players(self):
-        self.server.lobbies = { self.clients[0]['name'] : [self.clients[0], self.clients[1], self.clients[2], self.clients[3]] }
+        self.server.create_game(self.clients[0])
+        self.server.join_game(self.clients[1], self.clients[0]['name'])
+        self.server.join_game(self.clients[2], self.clients[0]['name'])
+        self.server.join_game(self.clients[3], self.clients[0]['name'])
         return self.server.start_game(self.clients[0])

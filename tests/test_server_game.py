@@ -164,7 +164,7 @@ class TestServerGame(TestServer):
 
         args.pop(1)
         self.clients[1]['socket'].send.assert_has_calls(args)
-        assert self.clients[2]['socket'].send.call_count == 6
+        assert self.clients[2]['socket'].send.call_count == 11
 
     def test_it_moves_for_three_players(self):
         game = self.start_game_with_three_players()
@@ -187,7 +187,7 @@ class TestServerGame(TestServer):
 
         args.pop(2)
         self.clients[2]['socket'].send.assert_has_calls(args)
-        assert self.clients[3]['socket'].send.call_count == 5
+        assert self.clients[3]['socket'].send.call_count == 12
 
     def test_it_moves_for_four_players(self):
         game = self.start_game_with_four_players()
@@ -216,4 +216,4 @@ class TestServerGame(TestServer):
 
         args.pop(3)
         self.clients[3]['socket'].send.assert_has_calls(args)
-        assert self.clients[4]['socket'].send.call_count == 5
+        assert self.clients[4]['socket'].send.call_count == 18

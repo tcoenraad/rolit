@@ -1,4 +1,3 @@
-from base64 import b64decode
 import random, datetime
 import hashlib
 
@@ -43,6 +42,13 @@ class Server(object):
                 return client
         return False
 
+    def get_clients_in_lobbies(self):
+        return [item for sublist in self.lobbies.values() for item in sublist]
+
+    def get_clients_in_challenges(self):
+        return [item for sublist in self.challenge_list.values() for item in sublist]
+
+
     def connect(self, socket, name, supported = Protocol.BAREBONE):
         if self.get_client(name):
             raise ServerError("Given name is already in use")
@@ -53,6 +59,7 @@ class Server(object):
                    'challenge' : supported == Protocol.CHALLENGE or supported == Protocol.CHAT_AND_CHALLENGE }
         self.clients.append(client)
 
+        # authenticate
         if name.startswith(Protocol.AUTH_PREFIX):
             client['nonce'] = hashlib.sha512(str(random.random())).hexdigest()
             client['socket'].send("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, client['nonce'], Protocol.EOL))
@@ -62,9 +69,19 @@ class Server(object):
         for (lobby, clients) in self.lobbies.items():
             client['socket'].send("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.FALSE, len(clients), Protocol.EOL))
 
+        # push online clients
         self.broadcast("%s %s %s%s" % (Protocol.ONLINE, name, Protocol.TRUE, Protocol.EOL))
+        for c in self.clients:
+            client['socket'].send("%s %s %s%s" % (Protocol.ONLINE, c['name'], Protocol.TRUE, Protocol.EOL))
+
+        # push challengable clients
         if client['challenge']:
             self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL), 'challenge')
+
+            challengees = self.get_clients_in_challenges()
+            for c in self.clients:
+                if c['challenge']:
+                    client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, c['name'], Protocol.FALSE if (c['name'] in challengees) else Protocol.TRUE, Protocol.EOL))
 
         return client
 
@@ -79,6 +96,13 @@ class Server(object):
                 clients.remove(client)
                 self.broadcast("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.FALSE, len(clients), Protocol.EOL))
 
+        if client['challenge']:
+            try:
+                self.challenge_response(client, Protocol.FALSE)
+            except ClientError:
+                pass
+
+        self.broadcast("%s %s %s%s" % (Protocol.ONLINE, client['name'], Protocol.FALSE, Protocol.EOL))
         if 'game_id' in client:
             self.game_over(self.network_games[client['game_id']])
 
@@ -99,9 +123,8 @@ class Server(object):
     def create_game(self, client):
         if client['name'] in self.lobbies:
             raise ClientError("You have already created a game")
-        for clients in self.lobbies.values():
-            if client in clients:
-                raise ClientError("You have already joined a game")
+        if client in self.get_clients_in_lobbies():
+            raise ClientError("You have already joined a game")
 
         clients = self.lobbies[client['name']] = [ client ]
         self.broadcast("%s %s %s %s%s" % (Protocol.GAME, client['name'], Protocol.FALSE, len(clients), Protocol.EOL))
@@ -239,8 +262,11 @@ class Server(object):
         if False in [challenged_client['challenge'] for challenged_client in challenged_clients]:
             raise ClientError("You challenged someone who does not support challenges")
 
+        if True in [challenged_client in self.get_clients_in_lobbies() for challenged_client in challenged_clients]:
+            raise ClientError("You challenged someone who already is in a not started game")
+
         if True in ['game_id' in challenged_client for challenged_client in challenged_clients]:
-            raise ClientError("You challenged someone who already is in game")
+            raise ClientError("You challenged someone who already is in started game")
 
         all_challengees = [item for sublist in self.challenge_list.values() for item in sublist]
         if len(list(set(all_challengees) & set(challenged_names))) > 0:
@@ -251,7 +277,7 @@ class Server(object):
         for challenged_client in challenged_clients:
             self.challenge_list[challenger['name']][challenged_client['name']] = False
             challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
-            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.FALSE, Protocol.EOL), 'challenge')
+            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenged_client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
 
     def challenge_response(self, challengee, response):
         for (challenge, challengees) in self.challenge_list.iteritems():
@@ -267,8 +293,9 @@ class Server(object):
 
     def remove_challenge(self, challenger):
         for challengee in self.challenge_list[challenger]:
-            self.get_client(challengee)['socket'].send("%s %s%s" % (Protocol.CHALLENGE_RESPONSE, Protocol.FALSE, Protocol.EOL))
-            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.TRUE, Protocol.EOL), 'challenge')
+            if self.get_client(challengee):
+                self.get_client(challengee)['socket'].send("%s %s%s" % (Protocol.CHALLENGE_RESPONSE, Protocol.FALSE, Protocol.EOL))
+                self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.TRUE, Protocol.EOL), 'challenge')
         del(self.challenge_list[challenger])
 
     def stats(self, client, stat, arg):
