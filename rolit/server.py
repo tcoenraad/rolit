@@ -321,6 +321,8 @@ class Server(object):
 
     def send_games(self, client):
         game_ids = [str(game) for game in self.network_games.keys()]
+        if not game_ids:
+            game_ids = [Protocol.UNDEFINED]
         client['socket'].send("%s %s%s" % (ProtocolExtended.GAMES, Protocol.SEPARATOR.join(game_ids), Protocol.EOL))
 
     def send_game_players(self, client, game_id):
