@@ -48,7 +48,6 @@ class Server(object):
     def get_clients_in_challenges(self):
         return [item for sublist in self.challenge_list.values() for item in sublist]
 
-
     def connect(self, socket, name, supported = Protocol.BAREBONE):
         if self.get_client(name):
             raise ServerError("Given name is already in use")
@@ -184,7 +183,7 @@ class Server(object):
 
         return game
 
-    def move(self, client, coord):
+    def move(self, client, x, y):
         try:
             network_game = self.network_games[client['game_id']]
         except KeyError:
@@ -192,10 +191,10 @@ class Server(object):
 
         try:
             try:
-                x = int(coord[0])
-                y = int(coord[1])
+                x = int(x)
+                y = int(y)
             except ValueError:
-                raise ClientError("Given coordinate `(%s, %s)` is not an integer, refer to protocol" % (coord[0], coord[1]))
+                raise ClientError("Given coordinate `(%s, %s)` is not an integer, refer to protocol" % (x, y))
 
             if x < 0 or x >= Board.DIM or y < 0 or y >= Board.DIM:
                 raise ClientError("Given coordinate `(%s, %s)` does not exist on board, refer to protocol" % (x, y))
@@ -231,7 +230,7 @@ class Server(object):
                 del(client['game_id'])
         del self.network_games[id(network_game['game'])]
 
-    def chat(self, sender, message):
+    def chat(self, sender, *message):
         if isinstance(message, str):
             message = [message]
         if not sender['chat']:
@@ -246,7 +245,7 @@ class Server(object):
         for chat_client in chat_clients:
             chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], " ".join(message), Protocol.EOL))
 
-    def challenge(self, challenger, challenged_names):
+    def challenge(self, challenger, *challenged_names):
         if isinstance(challenged_names, str):
             challenged_names = [challenged_names]
         if not challenger['challenge']:
@@ -304,9 +303,7 @@ class Server(object):
                 self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.TRUE, Protocol.EOL), 'challenge')
         del(self.challenge_list[challenger])
 
-    def stats(self, client, args):
-        stat = args[0]
-        query = args[1]
+    def stats(self, client, stat, query):
         try:
             if stat == Protocol.STAT_DATE:
                 try:

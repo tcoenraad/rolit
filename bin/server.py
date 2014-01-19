@@ -45,10 +45,8 @@ class ClientHandler(threading.Thread):
                 data = line.split(Protocol.SEPARATOR)
                 try:
                     route = self.server.router[data[0]]
-                    if len(data) > 2:
-                        getattr(self.server, route['method'])(self.client, data[1:])
-                    elif len(data) == 2:
-                        getattr(self.server, route['method'])(self.client, data[1])
+                    if len(data) >= 2:
+                        getattr(self.server, route['method'])(self.client, *data[1:])
                     else:
                         getattr(self.server, route['method'])(self.client)
                 except KeyError:
