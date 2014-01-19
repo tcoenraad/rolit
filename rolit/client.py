@@ -103,7 +103,7 @@ class Client(object):
         def game_board(board):
             print("The board for game `%s` looks like:" % board[0])
             if not board[1] == Protocol.UNDEFINED:
-                print Board.decode(Protocol.SEPARATOR.join(board[1:]))
+                print(Board.decode(Protocol.SEPARATOR.join(board[1:])))
 
         @staticmethod
         def stats(options):

@@ -81,7 +81,7 @@ class Server(object):
             challengees = self.get_clients_in_challenges()
             for c in self.clients:
                 if c['challenge']:
-                    client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, c['name'], Protocol.FALSE if (c['name'] in challengees) else Protocol.TRUE, Protocol.EOL))
+                    client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, c['name'], Protocol.FALSE if c['name'] in challengees else Protocol.TRUE, Protocol.EOL))
 
         return client
 
