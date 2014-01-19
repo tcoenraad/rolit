@@ -49,8 +49,8 @@ class ClientHandler(threading.Thread):
                         getattr(self.server, route['method'])(self.client, *data[1:])
                     else:
                         getattr(self.server, route['method'])(self.client)
-                except KeyError:
-                    raise ClientError('Invalid command `%s`, refer to protocol' % data)
+                except (KeyError, TypeError):
+                    raise ClientError('Invalid command `%s`, refer to protocol' % line)
         except ServerError as e:
             Helpers.error('500 Internal Server Error: `%s`' % e)
             self.socket.send('%s 500 Internal Server Error: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
