@@ -21,7 +21,7 @@ How to run
 
 Run server:
 
-    $ python bin/server.py <port = 3535>
+    $ python bin/server.py [host = localhost [port = 3535 [player_name [private_key_file]]]]
     
 Run tests:
 

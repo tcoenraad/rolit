@@ -20,20 +20,27 @@ class Helpers(object):
         print(colored(notification, 'red'))
 
     @staticmethod
-    def sign_data(data):
+    def sign_data(private_key, data):
 
         from Crypto.PublicKey import RSA
         from Crypto.Signature import PKCS1_v1_5
         from Crypto.Hash import SHA
         from base64 import b64encode, b64decode
 
-        private_key = open("./private_key", "r").read()
-        rsa_key = RSA.importKey(private_key)
+        try:
+            rsa_key = RSA.importKey(private_key)
+        except ValueError as e:
+            Helpers.error(e)
+            return
         signer = PKCS1_v1_5.new(rsa_key)
         digest = SHA.new()
 
         digest.update(b64decode(data))
-        sign = signer.sign(digest)
+        try:
+            sign = signer.sign(digest)
+        except TypeError as e:
+            Helpers.error(e)
+            return
         return b64encode(sign)
 
     @staticmethod

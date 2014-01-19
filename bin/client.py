@@ -6,6 +6,7 @@ import random
 
 from rolit.client import Client
 from rolit.protocol import Protocol
+from rolit.helpers import Helpers
 
 class ServerHandler(threading.Thread):
 
@@ -35,16 +36,29 @@ class ServerHandler(threading.Thread):
             sys.stdout.flush()
 
 def main():
-    client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
 
+    host = 'localhost'
     port = 3535
     name = "Monitor_%s" % random.randint(0, 3535)
-    if len(sys.argv) >= 2 and sys.argv[1].isdigit():
-        port = int(sys.argv[1])
-    if len(sys.argv) >= 3:
-        name = sys.argv[2]        
+    private_key_file = "./private_key"
+    if len(sys.argv) >= 2:
+        host = sys.argv[1]
+    if len(sys.argv) >= 3 and sys.argv[2].isdigit():
+        port = int(sys.argv[2])
+    if len(sys.argv) >= 4:
+        name = sys.argv[3]
+    if len(sys.argv) >= 5:
+        private_key_file = sys.argv[4]
 
-    client.socket.connect(('localhost', port))
+    try:
+        private_key = open(private_key_file, "r").read()
+    except IOError as e:
+        print(e)
+        Helpers.error("Cannot open private key file")
+        return
+
+    client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM), private_key)
+    client.socket.connect((host, port))
 
     thread = ServerHandler(client)
     thread.daemon = True
