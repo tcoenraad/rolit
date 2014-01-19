@@ -14,7 +14,7 @@ class TestServerBonus(TestServer):
         self.clients[0]['socket'].send.assert_has_calls(args)
         self.clients[1]['socket'].send.assert_has_calls(args)
         self.clients[2]['socket'].send.assert_has_calls(args)
-        assert self.clients[3]['socket'].send.call_count == 8
+        assert self.clients[3]['socket'].send.call_count == 7
 
     def test_chat_when_enabled_and_in_game(self):
         self.start_game_with_two_players()
@@ -34,7 +34,7 @@ class TestServerBonus(TestServer):
     def test_chat_with_disabled_clients(self):
         self.server.chat(self.clients[1], "This is a test message and I am not in game")
 
-        assert self.clients[3]['socket'].send.call_count == 8
+        assert self.clients[3]['socket'].send.call_count == 7
 
     def test_chat_when_disabled(self):
         with pytest.raises(ClientError):
@@ -81,7 +81,7 @@ class TestServerBonus(TestServer):
         args = call("%s %s %s %s%s" % (Protocol.CHALLENGE, self.clients[0]['name'], self.clients[1]['name'], self.clients[4]['name'], Protocol.EOL))
         self.clients[1]['socket'].send.assert_has_calls(args)
         self.clients[4]['socket'].send.assert_has_calls(args)
-        assert self.clients[3]['socket'].send.call_count == 8
+        assert self.clients[3]['socket'].send.call_count == 7
 
     def test_challenge_requests_overwrite(self):
         self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
@@ -109,7 +109,8 @@ class TestServerBonus(TestServer):
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[5]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.FALSE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL))]
+                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL))]
         self.clients[5]['socket'].send.assert_has_calls(args)
 
     def test_availability_on_connect(self):
@@ -148,4 +149,4 @@ class TestServerBonus(TestServer):
         self.clients[0]['socket'].send.assert_has_calls(args)
         self.clients[1]['socket'].send.assert_has_calls(args)
         self.clients[4]['socket'].send.assert_has_calls(args)
-        assert self.clients[3]['socket'].send.call_count == 8
+        assert self.clients[3]['socket'].send.call_count == 7

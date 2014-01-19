@@ -8,11 +8,15 @@ from test_server import TestServer
 class TestServerExtended(TestServer):
 
     def test_send_games(self):
+        self.server.send_games(self.clients[0])
+        args = call("%s %s%s" % (ProtocolExtended.GAMES, Protocol.UNDEFINED, Protocol.EOL))
+        self.clients[0]['socket'].send.assert_has_calls(args)
+
         game = self.start_game_with_two_players()
         self.server.send_games(self.clients[0])
 
-        args = "%s %s%s" % (ProtocolExtended.GAMES, id(game), Protocol.EOL)
-        self.clients[0]['socket'].send.assert_has_calls(call(args))
+        args = call("%s %s%s" % (ProtocolExtended.GAMES, id(game), Protocol.EOL))
+        self.clients[0]['socket'].send.assert_has_calls(args)
 
     def test_send_game_players(self):
         game = self.start_game_with_two_players()

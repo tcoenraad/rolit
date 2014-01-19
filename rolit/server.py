@@ -57,7 +57,6 @@ class Server(object):
                    'name' : name,
                    'chat' : supported == Protocol.CHAT or supported == Protocol.CHAT_AND_CHALLENGE,
                    'challenge' : supported == Protocol.CHALLENGE or supported == Protocol.CHAT_AND_CHALLENGE }
-        self.clients.append(client)
 
         # authenticate
         if name.startswith(Protocol.AUTH_PREFIX):
@@ -70,19 +69,21 @@ class Server(object):
             client['socket'].send("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.FALSE, len(clients), Protocol.EOL))
 
         # push online clients
-        self.broadcast("%s %s %s%s" % (Protocol.ONLINE, name, Protocol.TRUE, Protocol.EOL))
         for c in self.clients:
             client['socket'].send("%s %s %s%s" % (Protocol.ONLINE, c['name'], Protocol.TRUE, Protocol.EOL))
+        self.broadcast("%s %s %s%s" % (Protocol.ONLINE, name, Protocol.TRUE, Protocol.EOL))
+        client['socket'].send("%s %s %s%s" % (Protocol.ONLINE, name, Protocol.TRUE, Protocol.EOL))
 
         # push challengable clients
         if client['challenge']:
-            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL), 'challenge')
-
             challengees = self.get_clients_in_challenges()
             for c in self.clients:
                 if c['challenge']:
                     client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, c['name'], Protocol.FALSE if c['name'] in challengees else Protocol.TRUE, Protocol.EOL))
+            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL), 'challenge')
+            client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL))
 
+        self.clients.append(client)
         return client
 
     def disconnect(self, client):
@@ -99,6 +100,7 @@ class Server(object):
         if client['challenge']:
             try:
                 self.challenge_response(client, Protocol.FALSE)
+                self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
             except ClientError:
                 pass
 
