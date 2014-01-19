@@ -45,16 +45,12 @@ class ClientHandler(threading.Thread):
                 data = line.split(Protocol.SEPARATOR)
                 try:
                     route = self.server.router[data[0]]
-                    if not route['args'] == len(data) - 1:
-                        break
-                    if route['args'] == 0:
-                        getattr(self.server, route['method'])(self.client)
-                    elif route['args'] == 1:
+                    if len(data) > 2:
+                        getattr(self.server, route['method'])(self.client, data[1:])
+                    elif len(data) == 2:
                         getattr(self.server, route['method'])(self.client, data[1])
-                    elif route['args'] == 2:
-                        getattr(self.server, route['method'])(self.client, data[1], data[2])
-                    elif route['args'] == 3:
-                        getattr(self.server, route['method'])(self.client, data[1], data[2], data[3])
+                    else:
+                        getattr(self.server, route['method'])(self.client)
                 except KeyError:
                     raise ClientError('Invalid command `%s`, refer to protocol' % data)
         except ServerError as e:

@@ -12,9 +12,9 @@ class TestServerGame(TestServer):
 
         self.start_game_with_two_players()
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], '0', '0')
+            self.server.move(self.clients[0], ['0', '0'])
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], '0', '0')
+            self.server.move(self.clients[0], ['0', '0'])
         assert self.server.game_over.call_count == 1
 
     def test_it_validates_given_number_represents_a_field_on_board(self):
@@ -22,40 +22,40 @@ class TestServerGame(TestServer):
 
         self.start_game_with_two_players()
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], '-', '1')
+            self.server.move(self.clients[0], ['-', '1'])
 
         self.start_game_with_two_players()
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], '8', '8')
+            self.server.move(self.clients[0], ['8', '8'])
 
         self.start_game_with_two_players()
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], 'a', 'b')
+            self.server.move(self.clients[0], ['a', 'b'])
 
         self.start_game_with_two_players()
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], '0', '000')
+            self.server.move(self.clients[0], ['0', '000'])
 
         self.start_game_with_two_players()
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], '3', '3')
+            self.server.move(self.clients[0], ['3', '3'])
         assert self.server.game_over.call_count == 5
 
     def test_it_validates_client_is_in_game(self):
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], '5', '3')
+            self.server.move(self.clients[0], ['5', '3'])
 
         game = self.start_game_with_two_players()
         game.balls_left = 1
 
-        self.server.move(self.clients[0], '5', '3')
+        self.server.move(self.clients[0], ['5', '3'])
         with pytest.raises(ClientError):
-            self.server.move(self.clients[0], '5', '3')
+            self.server.move(self.clients[0], ['5', '3'])
 
     def test_it_validates_it_is_clients_turn(self):
         self.start_game_with_two_players()
         with pytest.raises(ClientError):
-            self.server.move(self.clients[1], '5', '2')
+            self.server.move(self.clients[1], ['5', '2'])
 
     def test_it_cannot_create_a_game_twice(self):
         self.server.create_game(self.clients[0])
@@ -153,7 +153,7 @@ class TestServerGame(TestServer):
         game = self.start_game_with_two_players()
         game.balls_left = 1
 
-        self.server.move(self.clients[0], '5', '3')
+        self.server.move(self.clients[0], ['5', '3'])
 
         args = [call("%s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL)),
             call("%s %s %s%s" % (Protocol.MOVED, '5', '3', Protocol.EOL)),
@@ -170,8 +170,8 @@ class TestServerGame(TestServer):
         game = self.start_game_with_three_players()
         game.balls_left = 2
 
-        self.server.move(self.clients[0], '5', '3')
-        self.server.move(self.clients[1], '5', '2')
+        self.server.move(self.clients[0], ['5', '3'])
+        self.server.move(self.clients[1], ['5', '2'])
 
         args = [call("%s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], Protocol.EOL)),
             call("%s %s %s%s" % (Protocol.MOVED, '5', '3', Protocol.EOL)),
@@ -193,9 +193,9 @@ class TestServerGame(TestServer):
         game = self.start_game_with_four_players()
         game.balls_left = 3
 
-        self.server.move(self.clients[0], '5', '3')
-        self.server.move(self.clients[1], '5', '2')
-        self.server.move(self.clients[2], '2', '4')
+        self.server.move(self.clients[0], ['5', '3'])
+        self.server.move(self.clients[1], ['5', '2'])
+        self.server.move(self.clients[2], ['2', '4'])
 
         args = [call("%s %s %s %s %s%s" % (Protocol.START, self.clients[0]['name'], self.clients[1]['name'], self.clients[2]['name'], self.clients[3]['name'], Protocol.EOL)),
             call("%s %s %s%s" % (Protocol.MOVED, '5', '3', Protocol.EOL)),

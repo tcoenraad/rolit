@@ -78,7 +78,7 @@ def main():
                 continue
             if len(data) == 1:
                 getattr(client, Client.options[option]['method'])()
-            elif len(data) >= 2:
+            else:
                 getattr(client, Client.options[option]['method'])(data[1:])
         except (KeyError, ValueError):
             continue

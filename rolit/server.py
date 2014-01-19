@@ -13,20 +13,20 @@ from rolit.leaderboard import Leaderboard, NoHighScoresError
 class Server(object):
 
     router = {
-        Protocol.AUTH : { 'args' : 1, 'method' : 'auth' },
-        Protocol.CREATE_GAME : { 'args' : 0, 'method' : 'create_game' },
-        Protocol.START_GAME : { 'args' : 0, 'method' : 'start_game' },
-        Protocol.JOIN_GAME : { 'args' : 1, 'method' : 'join_game' },
-        Protocol.MOVE : { 'args' : 2, 'method' : 'move' },
-        Protocol.CHAT : { 'args' : 1, 'method' : 'chat' },
-        Protocol.CHALLENGE : { 'args' : 1, 'method' : 'challenge' },
-        Protocol.CHALLENGE : { 'args' : 2, 'method' : 'challenge' },
-        Protocol.CHALLENGE : { 'args' : 3, 'method' : 'challenge' },
+        Protocol.AUTH : { 'method' : 'auth' },
+        Protocol.CREATE_GAME : { 'method' : 'create_game' },
+        Protocol.START_GAME : { 'method' : 'start_game' },
+        Protocol.JOIN_GAME : { 'method' : 'join_game' },
+        Protocol.MOVE : { 'method' : 'move' },
+        Protocol.CHAT : { 'method' : 'chat' },
+        Protocol.CHALLENGE : { 'method' : 'challenge' },
+        Protocol.CHALLENGE : { 'method' : 'challenge' },
+        Protocol.CHALLENGE : { 'method' : 'challenge' },
         Protocol.CHALLENGE_RESPONSE : { 'args' : 1, 'method' : 'challenge_response' },
-        Protocol.STATS : { 'args' : 2, 'method' : 'stats' },
-        ProtocolExtended.GAMES : { 'args' : 0, 'method' : 'send_games' },
-        ProtocolExtended.GAME_PLAYERS : { 'args' : 1, 'method' : 'send_game_players' },
-        ProtocolExtended.GAME_BOARD : { 'args' : 1, 'method' : 'send_game_board' }
+        Protocol.STATS : { 'method' : 'stats' },
+        ProtocolExtended.GAMES : { 'method' : 'send_games' },
+        ProtocolExtended.GAME_PLAYERS : { 'method' : 'send_game_players' },
+        ProtocolExtended.GAME_BOARD : { 'method' : 'send_game_board' }
     }
 
     def __init__(self):
@@ -131,9 +131,9 @@ class Server(object):
         clients = self.lobbies[client['name']] = [ client ]
         self.broadcast("%s %s %s %s%s" % (Protocol.GAME, client['name'], Protocol.FALSE, len(clients), Protocol.EOL))
 
-    def join_game(self, client, name):
+    def join_game(self, client, creator):
         try:
-            clients = self.lobbies[name]
+            clients = self.lobbies[creator]
         except KeyError:
             raise ClientError("Given client does not exist")
 
@@ -145,7 +145,7 @@ class Server(object):
 
         clients.append(client)
 
-        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, name, Protocol.FALSE, len(clients), Protocol.EOL))
+        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, creator, Protocol.FALSE, len(clients), Protocol.EOL))
 
     def start_game(self, creator):
         try:
@@ -184,7 +184,7 @@ class Server(object):
 
         return game
 
-    def move(self, client, x, y):
+    def move(self, client, coord):
         try:
             network_game = self.network_games[client['game_id']]
         except KeyError:
@@ -192,10 +192,10 @@ class Server(object):
 
         try:
             try:
-                x = int(x)
-                y = int(y)
+                x = int(coord[0])
+                y = int(coord[1])
             except ValueError:
-                raise ClientError("Given coordinate `(%s, %s)` is not an integer, refer to protocol" % (x, y))
+                raise ClientError("Given coordinate `(%s, %s)` is not an integer, refer to protocol" % (coord[0], coord[1]))
 
             if x < 0 or x >= Board.DIM or y < 0 or y >= Board.DIM:
                 raise ClientError("Given coordinate `(%s, %s)` does not exist on board, refer to protocol" % (x, y))
@@ -232,6 +232,8 @@ class Server(object):
         del self.network_games[id(network_game['game'])]
 
     def chat(self, sender, message):
+        if isinstance(message, str):
+            message = [message]
         if not sender['chat']:
             raise ClientError("You said you did not support chat, so you cannot send a chat message")
 
@@ -242,9 +244,11 @@ class Server(object):
         chat_clients = [client for client in clients if client['chat']]
 
         for chat_client in chat_clients:
-            chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], message, Protocol.EOL))
+            chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], " ".join(message), Protocol.EOL))
 
-    def challenge(self, challenger, *challenged_names):
+    def challenge(self, challenger, challenged_names):
+        if isinstance(challenged_names, str):
+            challenged_names = [challenged_names]
         if not challenger['challenge']:
             raise ClientError("You said you did not support challenges, so you cannot send a challenge request")
 
@@ -300,26 +304,28 @@ class Server(object):
                 self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.TRUE, Protocol.EOL), 'challenge')
         del(self.challenge_list[challenger])
 
-    def stats(self, client, stat, arg):
+    def stats(self, client, args):
+        stat = args[0]
+        query = args[1]
         try:
             if stat == Protocol.STAT_DATE:
                 try:
-                    date = arg.split("-")
+                    date = query.split("-")
                     if not len(date) == 3:
                         raise ClientError("Given argument `%s` is malformed, refer to protocol" % date)
                     date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
                 except ValueError:
-                    raise ClientError("Given argument `%s` cannot be converted to a valid date" % arg)
+                    raise ClientError("Given argument `%s` cannot be converted to a valid date" % query)
 
                 score = self.leaderboard.best_score_of_date(date)
-                client['socket'].send("%s %s %s %s %s%s" % (Protocol.STATS, stat, arg, score.name, score.score, Protocol.EOL))
+                client['socket'].send("%s %s %s %s %s%s" % (Protocol.STATS, stat, query, score.name, score.score, Protocol.EOL))
             elif stat == Protocol.STAT_PLAYER:
-                score = self.leaderboard.best_score_of_player(arg)
-                client['socket'].send("%s %s %s %s%s" % (Protocol.STATS, stat, arg, score.score, Protocol.EOL))
+                score = self.leaderboard.best_score_of_player(query)
+                client['socket'].send("%s %s %s %s%s" % (Protocol.STATS, stat, query, score.score, Protocol.EOL))
             else:
                 raise ClientError("Given stat `%s` is not recognized, refer to protocol" % stat)
         except NoHighScoresError:
-            client['socket'].send("%s %s %s %s%s" % (Protocol.STATS, stat, arg, Protocol.UNDEFINED, Protocol.EOL))
+            client['socket'].send("%s %s %s %s%s" % (Protocol.STATS, stat, query, Protocol.UNDEFINED, Protocol.EOL))
 
     def send_games(self, client):
         game_ids = [str(game) for game in self.network_games.keys()]
