@@ -55,10 +55,10 @@ class ClientHandler(threading.Thread):
             Helpers.error('500 Internal Server Error: `%s`' % e)
             self.socket.send('%s 500 Internal Server Error: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except ClientError as e:
-            Helpers.warning('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
+            Helpers.error('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
             self.socket.send('%s 400 Bad Request: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except IOError:
-            Helpers.warning('Connection error with %s' % self.name)
+            Helpers.error('Connection error with %s' % self.name)
         finally:
             Helpers.log('Connection lost with %s' % self.name)
             self.socket.close()
