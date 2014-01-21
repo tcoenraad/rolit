@@ -1,11 +1,12 @@
 from termcolor import colored
 from rolit.protocol import Protocol
+import time
 
 class Helpers(object):
 
     @staticmethod
     def log(message):
-        print("[log] %s" % message)
+        print("[%s] %s" % (time.strftime("%H:%M:%S"), message))
 
     @staticmethod
     def notice(notification):
