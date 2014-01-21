@@ -12,15 +12,13 @@ from rolit.leaderboard import Leaderboard, NoHighScoresError
 
 class Server(object):
 
-    router = {
+    routes = {
         Protocol.AUTH : { 'method' : 'auth' },
         Protocol.CREATE_GAME : { 'method' : 'create_game' },
         Protocol.START_GAME : { 'method' : 'start_game' },
         Protocol.JOIN_GAME : { 'method' : 'join_game' },
         Protocol.MOVE : { 'method' : 'move' },
         Protocol.CHAT : { 'method' : 'chat' },
-        Protocol.CHALLENGE : { 'method' : 'challenge' },
-        Protocol.CHALLENGE : { 'method' : 'challenge' },
         Protocol.CHALLENGE : { 'method' : 'challenge' },
         Protocol.CHALLENGE_RESPONSE : { 'args' : 1, 'method' : 'challenge_response' },
         Protocol.STATS : { 'method' : 'stats' },
@@ -231,8 +229,6 @@ class Server(object):
         del self.network_games[id(network_game['game'])]
 
     def chat(self, sender, *message):
-        if isinstance(message, str):
-            message = [message]
         if not sender['chat']:
             raise ClientError("You said you did not support chat, so you cannot send a chat message")
 
@@ -246,8 +242,6 @@ class Server(object):
             chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], " ".join(message), Protocol.EOL))
 
     def challenge(self, challenger, *challenged_names):
-        if isinstance(challenged_names, str):
-            challenged_names = [challenged_names]
         if not challenger['challenge']:
             raise ClientError("You said you did not support challenges, so you cannot send a challenge request")
 
