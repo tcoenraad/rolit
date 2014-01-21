@@ -39,7 +39,7 @@ class Client(object):
 
         @staticmethod
         def game(status):
-            Helpers.notice("[game update] `%s`, with `%s` players has status: %s" %(status[0], status[2], status[1]))
+            Helpers.notice("[game_update] `%s`, with `%s` players has status: %s" %(status[0], status[2], status[1]))
 
         def move(self):
             if self.client.auto_fire:
@@ -51,7 +51,7 @@ class Client(object):
         def moved(self, coord):
             x = int(coord[0])
             y = int(coord[1])
-            print("A move is done at x=%s, y=%s" % (x, y))
+            Helpers.notice("A move is done at x=%s, y=%s" % (x, y))
             try:
                 self.client.game.place(x, y)
             except GameOverError:
@@ -62,11 +62,11 @@ class Client(object):
             print(self.client.game.board)
 
         def game_over(self, players):
-            print("Game is over, winners were:")
-            print(players)
+            Helpers.notice("Game is over!")
+            print("Winners were: %s" % players)
 
         def start(self, players):
-            print("A game has started!")
+            Helpers.notice("A game has started!")
             print("Players are: %s" % players)
             number_of_players = len(players)
             if number_of_players == 2:
@@ -78,8 +78,8 @@ class Client(object):
             print(self.client.game.board)
 
         def handshake(self, options):
-            print("Connected established")
-            print("Chat = %s and challenge = %s" % (options[0] == Protocol.CHAT or options[0] == Protocol.CHAT_AND_CHALLENGE, options[0] == Protocol.CHALLENGE or options[0] == Protocol.CHAT_AND_CHALLENGE))
+            Helpers.notice("Connected established")
+            Helpers.notice("Chat = %s and challenge = %s" % (options[0] == Protocol.CHAT or options[0] == Protocol.CHAT_AND_CHALLENGE, options[0] == Protocol.CHALLENGE or options[0] == Protocol.CHAT_AND_CHALLENGE))
 
             if len(options) >= 2:
                 signature = Helpers.sign_data(self.client.private_key, options[1])
