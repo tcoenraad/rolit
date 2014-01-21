@@ -9,7 +9,7 @@ class Protocol(object):
     MOVE                    = 'move'
     MOVED                   = 'moveDone'
     GAME_OVER               = 'gameOver'
-    CHAT                    = 'chat'
+    CHAT                    = 'message'
     ONLINE                  = 'online'
     CHALLENGE               = 'challenge'
     CHALLENGE_RESPONSE      = 'challengeResponse'
