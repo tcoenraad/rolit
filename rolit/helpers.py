@@ -10,15 +10,15 @@ class Helpers(object):
 
     @staticmethod
     def notice(notification):
-        print(colored(notification, 'blue'))
+        print("[%s] %s" % (time.strftime("%H:%M:%S"), colored(notification, 'blue')))
 
     @staticmethod
     def warning(notification):
-        print(colored(notification, 'yellow'))
+        print("[%s] %s" % (time.strftime("%H:%M:%S"), colored(notification, 'yellow')))
  
     @staticmethod
     def error(notification):
-        print(colored(notification, 'red'))
+        print("[%s] %s" % (time.strftime("%H:%M:%S"), colored(notification, 'red')))
 
     @staticmethod
     def sign_data(private_key, data):
