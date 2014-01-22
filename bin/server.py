@@ -24,7 +24,7 @@ class ClientHandler(threading.Thread):
             data = line.split(Protocol.SEPARATOR)
 
             # before everything else, HANDSHAKE
-            if not data[0] == Protocol.HANDSHAKE or not data[1]:
+            if not data[0] == Protocol.HANDSHAKE or len(data) < 2:
                 return
 
             if len(data) == 2:

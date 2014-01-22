@@ -20,7 +20,7 @@ class Server(object):
         Protocol.MOVE : { 'method' : 'move' },
         Protocol.CHAT : { 'method' : 'chat' },
         Protocol.CHALLENGE : { 'method' : 'challenge' },
-        Protocol.CHALLENGE_RESPONSE : { 'args' : 1, 'method' : 'challenge_response' },
+        Protocol.CHALLENGE_RESPONSE : { 'method' : 'challenge_response' },
         Protocol.STATS : { 'method' : 'stats' },
         ProtocolExtended.GAMES : { 'method' : 'send_games' },
         ProtocolExtended.GAME_PLAYERS : { 'method' : 'send_game_players' },
