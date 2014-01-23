@@ -281,7 +281,8 @@ class Server(object):
             self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenged_client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
 
     def challenge_response(self, challenger, response):
-        challenge_accepted = response == Protocol.TRUE
+        response = Protocol.TRUE if response == Protocol.TRUE else Protocol.FALSE
+
         for (challenge, challengees) in self.challenge_list.iteritems():
             if challenger['name'] in challengees:
                 for challengee in challengees:
