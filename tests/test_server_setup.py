@@ -13,7 +13,7 @@ class TestServerSetup(TestServer):
         self.server.connect(socket, "Bestuur_35", Protocol.CHAT_AND_CHALLENGE)
 
         args = [call("%s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 1, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 1, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[1]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[2]['name'], Protocol.TRUE, Protocol.EOL)),
@@ -32,10 +32,10 @@ class TestServerSetup(TestServer):
             self.server.join_game(self.clients[5], self.clients[0]['name'])
 
         self.server.disconnect(self.clients[0])
-        args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 4, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 3, Protocol.EOL)),
+        args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 4, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 3, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 4, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 4, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.UNDEFINED, 4, Protocol.EOL))]
         self.clients[5]['socket'].send.assert_has_calls(args)
         assert self.clients[5]['socket'].send.call_count == 17

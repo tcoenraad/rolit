@@ -118,9 +118,9 @@ class TestServerGame(TestServer):
         self.server.join_game(self.clients[1], self.clients[0]['name'])
         self.server.start_game(self.clients[0])
 
-        args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 1, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 2, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.TRUE, 2, Protocol.EOL))]
+        args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 1, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 2, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.STARTED, 2, Protocol.EOL))]
         self.clients[2]['socket'].send.assert_has_calls(args)
 
     def test_it_starts_for_three_players(self):
@@ -129,10 +129,10 @@ class TestServerGame(TestServer):
         self.server.join_game(self.clients[2], self.clients[0]['name'])
         self.server.start_game(self.clients[0])
 
-        args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 1, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 2, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 3, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.TRUE, 3, Protocol.EOL))]
+        args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 1, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 2, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 3, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.STARTED, 3, Protocol.EOL))]
         self.clients[3]['socket'].send.assert_has_calls(args)
 
     def test_it_starts_for_four_players(self):
@@ -142,11 +142,11 @@ class TestServerGame(TestServer):
         self.server.join_game(self.clients[3], self.clients[0]['name'])
         self.server.start_game(self.clients[0])
 
-        args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 1, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 2, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 3, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.FALSE, 4, Protocol.EOL)),
-                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.TRUE, 4, Protocol.EOL))]
+        args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 1, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 2, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 3, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 4, Protocol.EOL)),
+                call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.STARTED, 4, Protocol.EOL))]
         self.clients[4]['socket'].send.assert_has_calls(args)
 
     def test_it_moves_for_two_players(self):

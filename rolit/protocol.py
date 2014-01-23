@@ -13,7 +13,7 @@ class Protocol(object):
     ONLINE                  = 'online'
     CHALLENGE               = 'challenge'
     CHALLENGE_RESPONSE      = 'challengeResponse'
-    CHALLENGE_AVAILABLE = 'canBeChallenged'
+    CHALLENGE_AVAILABLE     = 'canBeChallenged'
 
     RED          = 'red'
     YELLOW       = 'yellow'
@@ -35,7 +35,9 @@ class Protocol(object):
 
     SEPARATOR    = ' '
     EOL          = "\r\n"
-    TRUE         = '1'
-    FALSE        = '0'
+    TRUE         = 'true'
+    FALSE        = 'false'
+    STARTED      = '1'
+    NOT_STARTED  = '0'
     UNDEFINED    = '-1'
     ERROR        = 'error'

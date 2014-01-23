@@ -63,7 +63,7 @@ class Server(object):
             client['socket'].send("%s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Protocol.EOL))
 
         for (lobby, clients) in self.lobbies.items():
-            client['socket'].send("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.FALSE, len(clients), Protocol.EOL))
+            client['socket'].send("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.NOT_STARTED, len(clients), Protocol.EOL))
 
         # push online clients
         for c in self.clients:
@@ -92,7 +92,7 @@ class Server(object):
                 self.broadcast("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.UNDEFINED, len(clients), Protocol.EOL))
             elif client in clients:
                 clients.remove(client)
-                self.broadcast("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.FALSE, len(clients), Protocol.EOL))
+                self.broadcast("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.NOT_STARTED, len(clients), Protocol.EOL))
 
         if client['challenge']:
             try:
@@ -126,7 +126,7 @@ class Server(object):
             raise ClientError("You have already joined a game")
 
         clients = self.lobbies[client['name']] = [ client ]
-        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, client['name'], Protocol.FALSE, len(clients), Protocol.EOL))
+        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, client['name'], Protocol.NOT_STARTED, len(clients), Protocol.EOL))
 
     def join_game(self, client, creator):
         try:
@@ -142,7 +142,7 @@ class Server(object):
 
         clients.append(client)
 
-        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, creator, Protocol.FALSE, len(clients), Protocol.EOL))
+        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, creator, Protocol.NOT_STARTED, len(clients), Protocol.EOL))
 
     def start_game(self, creator):
         try:
@@ -153,7 +153,7 @@ class Server(object):
         if len(clients) == 1:
             raise ClientError("You cannot start a game with only one player")
 
-        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, creator['name'], Protocol.TRUE, len(clients), Protocol.EOL))
+        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, creator['name'], Protocol.STARTED, len(clients), Protocol.EOL))
         del(self.lobbies[creator['name']])
 
         return self.initiate_game(clients)
