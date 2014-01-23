@@ -124,6 +124,8 @@ class Server(object):
             raise ClientError("You have already created a game")
         if client in self.get_clients_in_lobbies():
             raise ClientError("You have already joined a game")
+        if client['name'] in self.get_clients_in_challenges():
+            raise ClientError("You are already in challenge")
 
         clients = self.lobbies[client['name']] = [ client ]
         self.broadcast("%s %s %s %s%s" % (Protocol.GAME, client['name'], Protocol.NOT_STARTED, len(clients), Protocol.EOL))
@@ -132,7 +134,7 @@ class Server(object):
         try:
             clients = self.lobbies[creator]
         except KeyError:
-            raise ClientError("Given client does not exist")
+            raise ClientError("Given client has not created a game")
 
         if client in clients:
             raise ClientError("You have already joined a game")
@@ -147,18 +149,21 @@ class Server(object):
     def start_game(self, creator):
         try:
             clients = self.lobbies[creator['name']]
+            if len(clients) == 1:
+                raise ClientError("You cannot start a game with only one player")
+
+            self.broadcast("%s %s %s %s%s" % (Protocol.GAME, creator['name'], Protocol.STARTED, len(clients), Protocol.EOL))
+            del(self.lobbies[creator['name']])
+
         except KeyError:
-            raise ClientError("You have not created a game")
+            try:
+                challengees = self.challenge_list[creator['name']]
+                if not all(challengees.values()):
+                    raise ClientError("You cannot start a game until everyone accepts the challenge")
+                clients = [self.get_client(client_name) for client_name in challengees]
+            except KeyError:
+                raise ClientError("You have not created a game")
 
-        if len(clients) == 1:
-            raise ClientError("You cannot start a game with only one player")
-
-        self.broadcast("%s %s %s %s%s" % (Protocol.GAME, creator['name'], Protocol.STARTED, len(clients), Protocol.EOL))
-        del(self.lobbies[creator['name']])
-
-        return self.initiate_game(clients)
-
-    def start_challenge_game(self, clients):
         return self.initiate_game(clients)
 
     def initiate_game(self, clients):
@@ -245,9 +250,6 @@ class Server(object):
         if not challenger['challenge']:
             raise ClientError("You said you did not support challenges, so you cannot send a challenge request")
 
-        if challenger['name'] in self.challenge_list:
-            self.remove_challenge(challenger['name'])
-
         if len(challenged_names) > 3:
             raise ClientError("You challenged more than 3 players, refer to the protocol")
 
@@ -269,7 +271,7 @@ class Server(object):
 
         all_challengees = [item for sublist in self.challenge_list.values() for item in sublist]
         if len(list(set(all_challengees) & set(challenged_names))) > 0:
-            raise AlreadyChallengedError("You challenged someone who already is in challenge")
+            raise ClientError("You challenged someone who already is in challenge")
 
         self.challenge_list[challenger['name']] = { challenger['name'] : True }
         self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenger['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
@@ -278,14 +280,17 @@ class Server(object):
             challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
             self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenged_client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
 
-    def challenge_response(self, challengee, response):
+    def challenge_response(self, challenger, response):
+        challenge_accepted = response == Protocol.TRUE
         for (challenge, challengees) in self.challenge_list.iteritems():
-            if challengee['name'] in challengees:
+            if challenger['name'] in challengees:
+                for challengee in challengees:
+                    if self.get_client(challengee):
+                        self.get_client(challengee)['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_RESPONSE, challenger['name'], response, Protocol.EOL))
+
                 if response == Protocol.TRUE:
-                    challengees[challengee['name']] = True
-                    if all(challengees.values()):
-                        self.start_challenge_game([self.get_client(client_name) for client_name in challengees])
-                elif response == Protocol.FALSE:
+                    challengees[challenger['name']] = True
+                else:
                     self.remove_challenge(challenge)
                 return
         raise ClientError("You responded while you were not challenged")
@@ -293,7 +298,6 @@ class Server(object):
     def remove_challenge(self, challenger):
         for challengee in self.challenge_list[challenger]:
             if self.get_client(challengee):
-                self.get_client(challengee)['socket'].send("%s %s%s" % (Protocol.CHALLENGE_RESPONSE, Protocol.FALSE, Protocol.EOL))
                 self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.TRUE, Protocol.EOL), 'challenge')
         del(self.challenge_list[challenger])
 
@@ -340,4 +344,3 @@ class Server(object):
 
 class ServerError(Exception): pass
 class ClientError(Exception): pass
-class AlreadyChallengedError(ClientError): pass

@@ -60,9 +60,14 @@ class TestServerBonus(TestServer):
         with pytest.raises(ClientError):
             self.server.challenge(self.clients[0], "W.A. van Buren")
 
+    def test_create_when_already_in_challenge(self):
+        self.server.challenge(self.clients[0], self.clients[1]['name'])
+        with pytest.raises(ClientError):
+            self.server.create_game(self.clients[0])
+
     def test_challenge_someone_that_is_already_challenged(self):
         self.server.challenge(self.clients[0], self.clients[1]['name'])
-        with pytest.raises(AlreadyChallengedError):
+        with pytest.raises(ClientError):
             self.server.challenge(self.clients[4], self.clients[1]['name'])
 
     def test_challenge_someone_that_is_already_in_a_not_started_game(self):
@@ -82,18 +87,6 @@ class TestServerBonus(TestServer):
         self.clients[1]['socket'].send.assert_has_calls(args)
         self.clients[4]['socket'].send.assert_has_calls(args)
         assert self.clients[3]['socket'].send.call_count == 7
-
-    def test_challenge_requests_overwrite(self):
-        self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
-
-        self.server.challenge(self.clients[0], self.clients[1]['name'])
-        args = call("%s %s%s" % (Protocol.CHALLENGE_RESPONSE, Protocol.FALSE, Protocol.EOL))
-        self.clients[0]['socket'].send.assert_has_calls(args)
-        self.clients[1]['socket'].send.assert_has_calls(args)
-        self.clients[4]['socket'].send.assert_has_calls(args)
-
-        args = call("%s %s %s%s" % (Protocol.CHALLENGE, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL))
-        self.clients[1]['socket'].send.assert_has_calls(args)
 
     def test_challenge_response_when_not_challenged(self):
         with pytest.raises(ClientError):
@@ -117,7 +110,6 @@ class TestServerBonus(TestServer):
         self.server.challenge(self.clients[0], self.clients[1]['name'])
 
         socket = Mock()
-        self.server.create_game(self.clients[0])
         self.server.connect(socket, "Bestuur_35", Protocol.CHAT_AND_CHALLENGE)
         args = [call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.FALSE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
@@ -127,25 +119,28 @@ class TestServerBonus(TestServer):
         socket.send.assert_has_calls(args)
 
     def test_challenge_request_accepted(self):
-        self.server.start_challenge_game = Mock(wraps=self.server.start_challenge_game)
+        self.server.initiate_game = Mock(wraps=self.server.initiate_game)
 
         self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
         self.server.challenge_response(self.clients[1], Protocol.TRUE)
-        assert self.server.start_challenge_game.call_count == 0
+
+        with pytest.raises(ClientError):
+            self.server.start_game(self.clients[0])
 
         self.server.challenge_response(self.clients[4], Protocol.TRUE)
-        assert sorted(self.server.start_challenge_game.call_args[0][0]) == sorted([self.clients[0], self.clients[1], self.clients[4]])
+        self.server.start_game(self.clients[0])
+        assert sorted(self.server.initiate_game.call_args[0][0]) == sorted([self.clients[0], self.clients[1], self.clients[4]])
 
     def test_challenge_request_rejected(self):
-        self.server.start_game = Mock(wraps=self.server.start_game)
-
         self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
         self.server.challenge_response(self.clients[1], Protocol.TRUE)
-        assert self.server.start_game.call_count == 0
-
         self.server.challenge_response(self.clients[4], Protocol.FALSE)
 
-        args = call("%s %s%s" % (Protocol.CHALLENGE_RESPONSE, Protocol.FALSE, Protocol.EOL))
+        with pytest.raises(ClientError):
+            self.server.start_game(self.clients[0])
+
+        args = [call("%s %s %s%s" % (Protocol.CHALLENGE_RESPONSE, self.clients[1]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGE_RESPONSE, self.clients[4]['name'], Protocol.FALSE, Protocol.EOL))]
         self.clients[0]['socket'].send.assert_has_calls(args)
         self.clients[1]['socket'].send.assert_has_calls(args)
         self.clients[4]['socket'].send.assert_has_calls(args)
