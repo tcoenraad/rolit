@@ -1,6 +1,7 @@
 import socket
 import sys
 import threading
+import ConfigParser
 
 from rolit.server import Server, ServerError, ClientError
 from rolit.protocol import Protocol
@@ -71,15 +72,17 @@ def main():
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     port = 3535
-    if len(sys.argv) >= 2 and sys.argv[1].isdigit():
-        port = int(sys.argv[1])
+    config = ConfigParser.ConfigParser()
+    config.read('config')
+    if config.has_option('server', 'port'):
+        port = config.getint('server', 'port')
 
     sock.bind(('0.0.0.0', port))
     sock.listen(1)
 
     server = Server()
 
-    Helpers.notice('Rolit server started on port %s' % port)
+    Helpers.log('Rolit server started on port %s' % port)
 
     while True:
         conn, client_address = sock.accept()

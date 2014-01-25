@@ -4,3 +4,4 @@ pytest-cov
 pytest-xdist
 mock
 pycrypto
+pbkdf2

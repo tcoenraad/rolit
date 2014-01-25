@@ -2,3 +2,4 @@
 .coverage
 public_key
 private_key
+config

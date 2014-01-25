@@ -1,24 +1,67 @@
+import threading
+import time
+import sys
+
+import ConfigParser
+
 from termcolor import colored
 from rolit.protocol import Protocol
-import time
 
 class Helpers(object):
 
+    class WhatsApp(threading.Thread):
+
+        __shared_state = {}
+        def __init__(self):
+            self.__dict__ = self.__shared_state
+            threading.Thread.__init__(self)
+
+            if not hasattr('self', 'whatsapp'):
+                config = ConfigParser.ConfigParser()
+                config.read('config')
+                if not config.has_option('whatsapp', 'phone'):
+                    self.whatsapp = None
+                    return
+
+                sys.path.append('./lib/python_whatsapp')
+                import whatsappy
+                from base64 import b64decode
+
+                self.whatsapp = whatsappy.Client(number=config.get('whatsapp', 'phone'), secret=b64decode(config.get('whatsapp', 'secret')))
+                self.whatsapp.login()
+                self.daemon = True
+                self.start()
+
+        def run(self):
+            while(True):
+                if (time.time() - self.whatsapp.last_ping) > self.whatsapp.PING_INTERVAL:
+                    self.whatsapp._ping()
+                    self.whatsapp.last_ping = time.time()
+
+        def send(self, message):
+            if self.whatsapp:
+                self.whatsapp.group_message(config.get('whatsapp', 'group'), message)
+
     @staticmethod
     def log(message):
-        print("[%s] %s" % (time.strftime("%H:%M:%S"), message))
+        message = "[%s] %s" % (time.strftime("%H:%M:%S"), message)
+        print(message)
+        Helpers.WhatsApp().send(message)
 
     @staticmethod
-    def notice(notification):
-        print(colored(notification, 'blue'))
+    def notice(message):
+        Helpers.WhatsApp().send(message)
+        print(colored(message, 'blue'))
 
     @staticmethod
-    def warning(notification):
-        print(colored(notification, 'yellow'))
+    def warning(message):
+        Helpers.WhatsApp().send(message)
+        print(colored(message, 'yellow'))
  
     @staticmethod
-    def error(notification):
-        print(colored(notification, 'red'))
+    def error(message):
+        Helpers.WhatsApp().send(message)
+        print(colored(message, 'red'))
 
     @staticmethod
     def sign_data(private_key, data):
