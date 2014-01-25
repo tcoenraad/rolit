@@ -16,7 +16,7 @@ class Helpers(object):
             self.__dict__ = self.__shared_state
             threading.Thread.__init__(self)
 
-            if not hasattr('self', 'whatsapp'):
+            if not hasattr(self, 'whatsapp'):
                 config = ConfigParser.ConfigParser()
                 config.read('config')
                 if not config.has_option('whatsapp', 'phone'):
