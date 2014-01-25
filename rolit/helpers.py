@@ -23,6 +23,8 @@ class Helpers(object):
                     self.whatsapp = None
                     return
 
+                self.config = config
+
                 sys.path.append('./lib/python_whatsapp')
                 import whatsappy
                 from base64 import b64decode
@@ -40,7 +42,7 @@ class Helpers(object):
 
         def send(self, message):
             if self.whatsapp:
-                self.whatsapp.group_message(config.get('whatsapp', 'group'), message)
+                self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
 
     @staticmethod
     def log(message):
