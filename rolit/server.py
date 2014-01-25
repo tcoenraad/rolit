@@ -12,6 +12,8 @@ from rolit.leaderboard import Leaderboard, NoHighScoresError
 
 class Server(object):
 
+    VERSION = 35
+
     routes = {
         Protocol.AUTH : { 'method' : 'auth' },
         Protocol.CREATE_GAME : { 'method' : 'create_game' },
@@ -58,7 +60,7 @@ class Server(object):
         # authenticate
         if name.startswith(Protocol.AUTH_PREFIX):
             client['nonce'] = hashlib.sha512(str(random.random())).hexdigest()
-            client['socket'].send("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, client['nonce'], Protocol.EOL))
+            client['socket'].send("%s %s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, VERSION, client['nonce'], Protocol.EOL))
         else:
             client['socket'].send("%s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Protocol.EOL))
 
