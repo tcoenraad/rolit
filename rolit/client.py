@@ -82,7 +82,7 @@ class Client(object):
             Helpers.notice("Chat = %s and challenge = %s" % (options[0] == Protocol.CHAT or options[0] == Protocol.CHAT_AND_CHALLENGE, options[0] == Protocol.CHALLENGE or options[0] == Protocol.CHAT_AND_CHALLENGE))
 
             if len(options) >= 2:
-                signature = Helpers.sign_data(self.client.private_key, options[1])
+                signature = Helpers.sign_data(self.client.private_key, options[2])
                 self.client.socket.send("%s %s%s" % (Protocol.AUTH, signature, Protocol.EOL))
 
         @staticmethod

@@ -17,7 +17,7 @@ class TestServerAuth(TestServer):
         sock = Mock()
         self.server.connect(sock, "player_twan", Protocol.CHAT_AND_CHALLENGE)
 
-        args = [call("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, "7a4f07ef7ac81ec31e04d55faffe33bdde93ec2398c338760e0d98adab7ba5acf2c39b2da1782f45e8a5a4d337dedcc647afebddd531782af42bafae98ce7ed5", Protocol.EOL))]
+        args = [call("%s %s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, "7a4f07ef7ac81ec31e04d55faffe33bdde93ec2398c338760e0d98adab7ba5acf2c39b2da1782f45e8a5a4d337dedcc647afebddd531782af42bafae98ce7ed5", Protocol.EOL))]
         sock.send.assert_has_calls(args)
 
     def test_a_client_authenticates_itself(self):

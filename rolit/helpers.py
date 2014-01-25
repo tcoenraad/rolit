@@ -35,13 +35,13 @@ class Helpers(object):
                 self.start()
 
         def run(self):
-            while(True):
+            while(hasattr(self, 'whatsapp')):
                 if (time.time() - self.whatsapp.last_ping) > self.whatsapp.PING_INTERVAL:
                     self.whatsapp._ping()
                     self.whatsapp.last_ping = time.time()
 
         def send(self, message):
-            if self.whatsapp:
+            if hasattr(self, 'whatsapp'):
                 try:
                     self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
                 except IOError:

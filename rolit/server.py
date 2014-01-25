@@ -60,7 +60,7 @@ class Server(object):
         # authenticate
         if name.startswith(Protocol.AUTH_PREFIX):
             client['nonce'] = hashlib.sha512(str(random.random())).hexdigest()
-            client['socket'].send("%s %s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, VERSION, client['nonce'], Protocol.EOL))
+            client['socket'].send("%s %s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, client['nonce'], Protocol.EOL))
         else:
             client['socket'].send("%s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Protocol.EOL))
 
