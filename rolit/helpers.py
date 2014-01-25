@@ -42,7 +42,12 @@ class Helpers(object):
 
         def send(self, message):
             if self.whatsapp:
-                self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
+                try:
+                    self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
+                except IOError:
+                    del self.whatsapp
+                    Helpers.error("Lost connection to WhatsApp!")
+                    Helpers.WhatsApp().send(message)
 
     def whatsapp(func):
         def inner(*args, **kwargs):
