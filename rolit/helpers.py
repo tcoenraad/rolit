@@ -44,26 +44,48 @@ class Helpers(object):
             if self.whatsapp:
                 self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
 
+    def whatsapp(func):
+        def inner(*args, **kwargs):
+            Helpers.WhatsApp().send(args[0])
+            return func(*args, **kwargs)
+        return inner
+
     @staticmethod
     def log(message):
         message = "[%s] %s" % (time.strftime("%H:%M:%S"), message)
         print(message)
-        Helpers.WhatsApp().send(message)
+
+    @staticmethod
+    @whatsapp
+    def log_and_whatsapp(message):
+        Helpers.log(message)
 
     @staticmethod
     def notice(message):
-        Helpers.WhatsApp().send(message)
         print(colored(message, 'blue'))
 
     @staticmethod
+    @whatsapp
+    def notice_and_whatsapp(message):
+        Helpers.notice(message)
+
+    @staticmethod
     def warning(message):
-        Helpers.WhatsApp().send(message)
         print(colored(message, 'yellow'))
- 
+
+    @staticmethod
+    @whatsapp
+    def warning_and_whatsapp(message):
+        Helpers.log(message)
+
     @staticmethod
     def error(message):
-        Helpers.WhatsApp().send(message)
         print(colored(message, 'red'))
+
+    @staticmethod
+    @whatsapp
+    def error_and_whatsapp(message):
+        Helpers.log(message)
 
     @staticmethod
     def sign_data(private_key, data):
