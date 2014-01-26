@@ -1,5 +1,6 @@
-import threading
+from threading import Timer
 import time
+import socket
 import sys
 
 import ConfigParser
@@ -9,12 +10,11 @@ from rolit.protocol import Protocol
 
 class Helpers(object):
 
-    class WhatsApp(threading.Thread):
+    class WhatsApp(object):
 
         __shared_state = {}
         def __init__(self):
             self.__dict__ = self.__shared_state
-            threading.Thread.__init__(self)
 
             if not hasattr(self, 'whatsapp'):
                 config = ConfigParser.ConfigParser()
@@ -31,23 +31,23 @@ class Helpers(object):
 
                 self.whatsapp = whatsappy.Client(number=config.get('whatsapp', 'phone'), secret=b64decode(config.get('whatsapp', 'secret')))
                 self.whatsapp.login()
-                self.daemon = True
-                self.start()
+                self.send("WhatsApp connection established for `%s`" % socket.gethostname())
+                self.timer = Timer(self.whatsapp.PING_INTERVAL, self._ping, ())
+                self.timer.daemon = True
+                self.timer.start()
 
-        def run(self):
-            while(hasattr(self, 'whatsapp')):
-                if (time.time() - self.whatsapp.last_ping) > self.whatsapp.PING_INTERVAL:
-                    self.whatsapp._ping()
-                    self.whatsapp.last_ping = time.time()
+        def _ping(self):
+            try:
+                self.whatsapp._ping()
+                self.whatsapp.last_ping = time.time()
+            except IOError:
+                del self.whatsapp
+                self.timer.cancel()
+                Helpers.error_and_whatsapp("Connection lost to WhatsApp while pinging!")
 
         def send(self, message):
-            if hasattr(self, 'whatsapp'):
-                try:
-                    self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
-                except IOError:
-                    del self.whatsapp
-                    Helpers.error("Lost connection to WhatsApp!")
-                    Helpers.WhatsApp().send(message)
+            if self.whatsapp:
+                self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
 
     def whatsapp(func):
         def inner(*args, **kwargs):

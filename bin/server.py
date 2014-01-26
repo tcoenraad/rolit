@@ -81,7 +81,7 @@ def main():
 
     server = Server()
 
-    Helpers.log_and_whatsapp('Rolit server started on port %s' % port)
+    Helpers.log_and_whatsapp('A Rolit server has started for `%s` on port %s' % (socket.gethostname(), port))
 
     while True:
         conn, client_address = sock.accept()
