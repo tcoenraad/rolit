@@ -1,5 +1,6 @@
 import random, datetime
 import hashlib
+from base64 import b64decode
 
 from rolit.helpers import Helpers
 
@@ -110,7 +111,7 @@ class Server(object):
     def auth(self, client, signature):
         if 'nonce' not in client:
             raise ClientError("You cannot authenticate yourself without a nonce")
-        if Helpers.verify_sign(client['name'], signature, client['nonce']):
+        if Helpers.verify_sign(client['name'], b64decode(signature), client['nonce']):
             client['verified'] = True
             client['socket'].send("%s%s" % (Protocol.AUTH_OK, Protocol.EOL))
         else:

@@ -41,7 +41,6 @@ class Helpers(object):
         def _ping(self):
             try:
                 self.whatsapp._ping()
-                self.whatsapp.last_ping = time.time()
             except IOError:
                 del self.whatsapp
                 self.timer.cancel()
@@ -105,7 +104,6 @@ class Helpers(object):
         from Crypto.PublicKey import RSA
         from Crypto.Signature import PKCS1_v1_5
         from Crypto.Hash import SHA
-        from base64 import b64encode, b64decode
 
         try:
             rsa_key = RSA.importKey(private_key)
@@ -115,27 +113,27 @@ class Helpers(object):
         signer = PKCS1_v1_5.new(rsa_key)
         digest = SHA.new()
 
-        digest.update(b64decode(data))
+        digest.update(data)
         try:
             sign = signer.sign(digest)
         except TypeError as e:
             Helpers.error(e)
             return
-        return b64encode(sign)
+        return sign
 
     @staticmethod
     def verify_sign(player_name, signature, data):
+
         from Crypto.PublicKey import RSA
         from Crypto.Signature import PKCS1_v1_5
         from Crypto.Hash import SHA
-        from base64 import b64decode
         import socket
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         sock.connect(('ss-security.student.utwente.nl', 2013))
         sock.send("%s %s%s" % ("PUBLICKEY", player_name, Protocol.EOL))
-        # assert 0
+
         response = sock.recv(4096)
 
         if not response:
@@ -152,7 +150,7 @@ class Helpers(object):
         signer = PKCS1_v1_5.new(rsa_key)
         digest = SHA.new()
 
-        digest.update(b64decode(data))
-        if signer.verify(digest, b64decode(signature)):
+        digest.update(data)
+        if signer.verify(digest, signature):
             return True
         return False

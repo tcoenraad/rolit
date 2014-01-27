@@ -1,6 +1,7 @@
 import pytest
 from mock import Mock, call, patch
 import socket
+from base64 import b64decode
 
 from rolit.server import *
 from test_server import TestServer
@@ -24,7 +25,7 @@ class TestServerAuth(TestServer):
         sock = Mock()
         client = self.server.connect(sock, "player_twan", Protocol.CHAT_AND_CHALLENGE)
 
-        self.server.auth(client, "ZWd5ELjDQNtbHJdqw2xIPL9rZvUWZWX1Wzo8nJBw5kvjtLpcmMOM8NSqNyUhcDm4QQTeNaE9Yll6eh3/SYiUQw==")
+        self.server.auth(client, "TH+47t9LLgJh5GgcAMmqbOC0BYXptUltzGBzJ/TpVGM0QWfuMxAq+g68k+e/QPYrmWwk7TeX5LiPgeodRAwDsA==")
 
         args = [call("%s%s" % (Protocol.AUTH_OK, Protocol.EOL))]
         sock.send.assert_has_calls(args)
