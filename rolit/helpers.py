@@ -31,10 +31,12 @@ class Helpers(object):
 
                 self.whatsapp = whatsappy.Client(number=config.get('whatsapp', 'phone'), secret=b64decode(config.get('whatsapp', 'secret')))
                 self.whatsapp.login()
-                self.send("WhatsApp connection established for `%s`" % socket.gethostname())
+
                 self.timer = Timer(self.whatsapp.PING_INTERVAL, self._ping, ())
                 self.timer.daemon = True
                 self.timer.start()
+
+                Helpers.error_and_whatsapp("WhatsApp connection established for `%s`" % socket.gethostname())
 
         def _ping(self):
             try:
