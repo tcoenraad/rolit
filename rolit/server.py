@@ -62,7 +62,7 @@ class Server(object):
             client['nonce'] = hashlib.sha512(str(random.random())).hexdigest()
             client['socket'].send("%s %s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, client['nonce'], Protocol.EOL))
         else:
-            client['socket'].send("%s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Protocol.EOL))
+            client['socket'].send("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
 
         for (lobby, clients) in self.lobbies.items():
             client['socket'].send("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.NOT_STARTED, len(clients), Protocol.EOL))

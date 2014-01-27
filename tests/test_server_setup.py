@@ -12,7 +12,7 @@ class TestServerSetup(TestServer):
         self.server.create_game(self.clients[0])
         self.server.connect(socket, "Bestuur_35", Protocol.CHAT_AND_CHALLENGE)
 
-        args = [call("%s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Protocol.EOL)),
+        args = [call("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 1, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[1]['name'], Protocol.TRUE, Protocol.EOL)),
