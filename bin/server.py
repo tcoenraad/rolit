@@ -57,8 +57,8 @@ class ClientHandler(threading.Thread):
         except ClientError as e:
             Helpers.error_and_whatsapp('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
             self.socket.send('%s 400 Bad Request: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
-        except IOError:
-            Helpers.error_and_whatsapp('Connection error with %s' % self.name)
+        except IOError as e:
+            Helpers.error_and_whatsapp('Connection error `%s` with %s' % (e, self.name))
         finally:
             Helpers.log_and_whatsapp('Connection lost with %s' % self.name)
             self.socket.close()

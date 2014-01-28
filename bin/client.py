@@ -5,6 +5,7 @@ import threading
 import random
 
 from rolit.client import Client
+from rolit.server import Server
 from rolit.protocol import Protocol
 from rolit.helpers import Helpers
 
@@ -64,7 +65,7 @@ def main():
     thread.daemon = True
     thread.start()
 
-    client.socket.send("%s %s %s %s" % (Protocol.HANDSHAKE, name, Protocol.TRUE, Protocol.TRUE))
+    client.socket.send("%s %s %s %s%s" % (Protocol.HANDSHAKE, name, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
     print("Welcome to the Rolit monitor, %s!" % name)
     Client.menu()
 

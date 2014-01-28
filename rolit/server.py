@@ -14,6 +14,8 @@ from rolit.leaderboard import Leaderboard, NoHighScoresError
 class Server(object):
 
     VERSION = 35
+    WINNING_SCORE = 1
+    LOSING_SCORE = 0
 
     routes = {
         Protocol.AUTH : { 'method' : 'auth' },
@@ -208,12 +210,12 @@ class Server(object):
             if network_game['game'].current_player != network_game['clients'].index(client):
                 raise ClientError("Client is not current player of game, refer to protocol")
 
-            for client in network_game['clients']:
-                client['socket'].send("%s %s %s%s" % (Protocol.MOVED, x, y, Protocol.EOL))
+            for c in network_game['clients']:
+                c['socket'].send("%s %s %s %s%s" % (Protocol.MOVED, client['name'], x, y, Protocol.EOL))
             try:
                 network_game['game'].place(x, y)
             except BoardError:
-                raise ClientError("Given coordinate `%s` is not a valid move on the current board")
+                raise ClientError("Given coordinate `%s` is not a valid move on the current board" % [x, y])
 
             network_game['clients'][network_game['game'].current_player]['socket'].send("%s%s" % (Protocol.MOVE, Protocol.EOL))
         except (ClientError, GameOverError) as e:
@@ -227,12 +229,12 @@ class Server(object):
                 winning_players = network_game['game'].winning_players()
                 winning_clients = [network_game['clients'][p] for p in winning_players]
 
-                client['socket'].send("%s %s%s" % (Protocol.GAME_OVER, ' '.join(client['name'] for client in winning_clients), Protocol.EOL))
+                client['socket'].send("%s %s %s%s" % (Protocol.GAME_OVER, Server.WINNING_SCORE, ' '.join(client['name'] for client in winning_clients), Protocol.EOL))
 
                 if client in winning_clients and 'verified' in client:
-                    self.leaderboard.add_score(client['name'], datetime.datetime.now(), 1)
+                    self.leaderboard.add_score(client['name'], datetime.datetime.now(), Server.WINNING_SCORE)
                 else:
-                    self.leaderboard.add_score(client['name'], datetime.datetime.now(), 0)
+                    self.leaderboard.add_score(client['name'], datetime.datetime.now(), Server.LOSING_SCORE)
                 del(client['game_id'])
         del self.network_games[id(network_game['game'])]
 

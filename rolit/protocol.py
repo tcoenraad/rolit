@@ -15,11 +15,6 @@ class Protocol(object):
     CHALLENGE_RESPONSE      = 'challengeResponse'
     CHALLENGE_AVAILABLE     = 'canBeChallenged'
 
-    RED          = 'red'
-    YELLOW       = 'yellow'
-    BLUE         = 'blue'
-    GREEN        = 'green'
-
     STATS        = 'highscore'
     STAT_DATE    = 'date'
     STAT_PLAYER  = 'player'

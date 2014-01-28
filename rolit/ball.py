@@ -1,6 +1,5 @@
 from termcolor import colored
 
-from rolit.protocol import Protocol
 from rolit.protocol_extended import ProtocolExtended
 
 class Ball(object):
@@ -19,25 +18,25 @@ class Ball(object):
 
     def encode(self):
         if self == Ball(Ball.RED):
-            return Protocol.RED
+            return ProtocolExtended.RED
         elif self == Ball(Ball.BLUE):
-            return Protocol.BLUE
+            return ProtocolExtended.BLUE
         elif self == Ball(Ball.YELLOW):
-            return Protocol.YELLOW
+            return ProtocolExtended.YELLOW
         elif self == Ball(Ball.GREEN):
-            return Protocol.GREEN
+            return ProtocolExtended.GREEN
         else:
             return ProtocolExtended.EMPTY
 
     @staticmethod
     def decode(color):
-        if color == Protocol.RED:
+        if color == ProtocolExtended.RED:
             return Ball(Ball.RED)
-        elif color == Protocol.BLUE:
+        elif color == ProtocolExtended.BLUE:
             return Ball(Ball.BLUE)
-        elif color == Protocol.YELLOW:
+        elif color == ProtocolExtended.YELLOW:
             return Ball(Ball.YELLOW)
-        elif color == Protocol.GREEN:
+        elif color == ProtocolExtended.GREEN:
             return Ball(Ball.GREEN)
         else:
             return Ball(Ball.EMPTY)
