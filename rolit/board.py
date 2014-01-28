@@ -7,7 +7,7 @@ class Board(object):
     DIM = 8
 
     def __init__(self):
-        self.board = [[Ball() for col in range(Board.DIM)] for row in range(Board.DIM)]
+        self.board = [[Ball() for __ in range(Board.DIM)] for __ in range(Board.DIM)]
         self.board[Board.DIM/2 - 1][Board.DIM/2 - 1] = Ball(Ball.RED)
         self.board[Board.DIM/2 - 1][Board.DIM/2]     = Ball(Ball.BLUE)
         self.board[Board.DIM/2][Board.DIM/2 - 1]     = Ball(Ball.YELLOW)
