@@ -19,7 +19,7 @@ class ClientHandler(threading.Thread):
         try:
             line = self.socket.recv(4096).strip()
 
-            Helpers.log_and_whatsapp("`%s`: `%s`" % (self.name, line))
+            Helpers.log("`%s`: `%s`" % (self.name, line))
 
             data = line.split(Protocol.SEPARATOR)
 
@@ -40,7 +40,7 @@ class ClientHandler(threading.Thread):
                 if not line:
                     break
 
-                Helpers.log_and_whatsapp("`%s`: `%s`" % (self.name, line))
+                Helpers.log("`%s`: `%s`" % (self.name, line))
 
                 data = line.split(Protocol.SEPARATOR)
                 try:
