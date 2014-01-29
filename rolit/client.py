@@ -84,7 +84,7 @@ class Client(object):
 
             if len(options) >= 2:
                 signature = b64encode(Helpers.sign_data(self.client.private_key, options[2]))
-                self.client.socket.send("%s %s%s" % (Protocol.AUTH, signature, Protocol.EOL))
+                self.client.socket.sendall("%s %s%s" % (Protocol.AUTH, signature, Protocol.EOL))
 
         @staticmethod
         def auth():
@@ -148,31 +148,31 @@ class Client(object):
         Helpers.notice('-' * 16)
 
     def get_games(self):
-        self.socket.send("%s%s" % (ProtocolExtended.GAMES, Protocol.EOL))
+        self.socket.sendall("%s%s" % (ProtocolExtended.GAMES, Protocol.EOL))
 
     def get_game_players(self, game_id):
-        self.socket.send("%s %s%s" % (ProtocolExtended.GAME_PLAYERS, game_id[0], Protocol.EOL))
+        self.socket.sendall("%s %s%s" % (ProtocolExtended.GAME_PLAYERS, game_id[0], Protocol.EOL))
 
     def get_game_board(self, game_id):
-        self.socket.send("%s %s%s" % (ProtocolExtended.GAME_BOARD, game_id[0], Protocol.EOL))
+        self.socket.sendall("%s %s%s" % (ProtocolExtended.GAME_BOARD, game_id[0], Protocol.EOL))
 
     def get_stat_date(self, date):
-        self.socket.send("%s %s %s%s" % (Protocol.STATS, Protocol.STAT_DATE, date[0], Protocol.EOL))
+        self.socket.sendall("%s %s %s%s" % (Protocol.STATS, Protocol.STAT_DATE, date[0], Protocol.EOL))
 
     def get_stat_player(self, player):
-        self.socket.send("%s %s %s%s" % (Protocol.STATS, Protocol.STAT_PLAYER, player[0], Protocol.EOL))
+        self.socket.sendall("%s %s %s%s" % (Protocol.STATS, Protocol.STAT_PLAYER, player[0], Protocol.EOL))
 
     def create_game(self):
-        self.socket.send("%s%s" % (Protocol.CREATE_GAME, Protocol.EOL))
+        self.socket.sendall("%s%s" % (Protocol.CREATE_GAME, Protocol.EOL))
         print("Game created, wait for others to join")
         print("Start this game with [s]")
 
     def join_game(self, player):
-        self.socket.send("%s %s%s" % (Protocol.JOIN_GAME, player[0], Protocol.EOL))
+        self.socket.sendall("%s %s%s" % (Protocol.JOIN_GAME, player[0], Protocol.EOL))
         print("Joined game `%s`, waiting for other to join and creator to start" % player)
 
     def start_game(self):
-        self.socket.send("%s%s" % (Protocol.START_GAME, Protocol.EOL))
+        self.socket.sendall("%s%s" % (Protocol.START_GAME, Protocol.EOL))
 
     def place(self, coord):
         try:
@@ -189,7 +189,7 @@ class Client(object):
         except BoardError:
             print("The move you suggested is not valid, make another move please")
             return
-        self.socket.send("%s %s %s%s" % (Protocol.MOVE, x, y, Protocol.EOL))
+        self.socket.sendall("%s %s %s%s" % (Protocol.MOVE, x, y, Protocol.EOL))
 
     def enable_ai(self):
         self.auto_fire = True
@@ -207,5 +207,5 @@ class Client(object):
                     pass
                 except BoardError:
                     continue
-                self.socket.send("%s %s %s%s" % (Protocol.MOVE, x, y, Protocol.EOL))
+                self.socket.sendall("%s %s %s%s" % (Protocol.MOVE, x, y, Protocol.EOL))
                 return

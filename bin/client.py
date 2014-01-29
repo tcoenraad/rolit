@@ -65,7 +65,7 @@ def main():
     thread.daemon = True
     thread.start()
 
-    client.socket.send("%s %s %s %s%s" % (Protocol.HANDSHAKE, name, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
+    client.socket.sendall("%s %s %s %s%s" % (Protocol.HANDSHAKE, name, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
     print("Welcome to the Rolit monitor, %s!" % name)
     Client.menu()
 

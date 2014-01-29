@@ -53,10 +53,10 @@ class ClientHandler(threading.Thread):
                     raise ClientError('Invalid command `%s`, refer to protocol' % line)
         except ServerError as e:
             Helpers.error_and_whatsapp('500 Internal Server Error: `%s`' % e)
-            self.socket.send('%s 500 Internal Server Error: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
+            self.socket.sendall('%s 500 Internal Server Error: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except ClientError as e:
             Helpers.error_and_whatsapp('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
-            self.socket.send('%s 400 Bad Request: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
+            self.socket.sendall('%s 400 Bad Request: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except IOError as e:
             Helpers.error_and_whatsapp('Connection error `%s` with %s' % (e, self.name))
         finally:
