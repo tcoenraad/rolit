@@ -63,27 +63,27 @@ class Server(object):
         # authenticate
         if name.startswith(Protocol.AUTH_PREFIX):
             client['nonce'] = hashlib.sha512(str(random.random())).hexdigest()
-            client['socket'].send("%s %s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, client['nonce'], Protocol.EOL))
+            client['socket'].sendall("%s %s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, client['nonce'], Protocol.EOL))
         else:
-            client['socket'].send("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
+            client['socket'].sendall("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
 
         for (lobby, clients) in self.lobbies.items():
-            client['socket'].send("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.NOT_STARTED, len(clients), Protocol.EOL))
+            client['socket'].sendall("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.NOT_STARTED, len(clients), Protocol.EOL))
 
         # push online clients
         for c in self.clients:
-            client['socket'].send("%s %s %s%s" % (Protocol.ONLINE, c['name'], Protocol.TRUE, Protocol.EOL))
+            client['socket'].sendall("%s %s %s%s" % (Protocol.ONLINE, c['name'], Protocol.TRUE, Protocol.EOL))
         self.broadcast("%s %s %s%s" % (Protocol.ONLINE, name, Protocol.TRUE, Protocol.EOL))
-        client['socket'].send("%s %s %s%s" % (Protocol.ONLINE, name, Protocol.TRUE, Protocol.EOL))
+        client['socket'].sendall("%s %s %s%s" % (Protocol.ONLINE, name, Protocol.TRUE, Protocol.EOL))
 
         # push challengable clients
         if client['challenge']:
             challengees = self.get_clients_in_challenges()
             for c in self.clients:
                 if c['challenge']:
-                    client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, c['name'], Protocol.FALSE if c['name'] in challengees else Protocol.TRUE, Protocol.EOL))
+                    client['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, c['name'], Protocol.FALSE if c['name'] in challengees else Protocol.TRUE, Protocol.EOL))
             self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL), 'challenge')
-            client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL))
+            client['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL))
 
         self.clients.append(client)
         return client
@@ -115,14 +115,14 @@ class Server(object):
             raise ClientError("You cannot authenticate yourself without a nonce")
         if Helpers.verify_sign(client['name'], b64decode(signature), client['nonce']):
             client['verified'] = True
-            client['socket'].send("%s%s" % (Protocol.AUTH_OK, Protocol.EOL))
+            client['socket'].sendall("%s%s" % (Protocol.AUTH_OK, Protocol.EOL))
         else:
             raise ClientError("Given signature is not correct")
 
     def broadcast(self, msg, supported=""):
         for client in self.clients:
             if supported == "" or client[supported]:
-                client['socket'].send(msg)
+                client['socket'].sendall(msg)
 
     def create_game(self, client):
         if client['name'] in self.lobbies:
@@ -185,7 +185,7 @@ class Server(object):
 
         for client in clients:
             client['game_id'] = game_id
-            client['socket'].send("%s %s%s" % (Protocol.START, ' '.join(c['name'] for c in clients), Protocol.EOL))
+            client['socket'].sendall("%s %s%s" % (Protocol.START, ' '.join(c['name'] for c in clients), Protocol.EOL))
 
         clients[0]['socket'].send("%s%s" % (Protocol.MOVE, Protocol.EOL))
 
@@ -229,7 +229,7 @@ class Server(object):
                 winning_players = network_game['game'].winning_players()
                 winning_clients = [network_game['clients'][p] for p in winning_players]
 
-                client['socket'].send("%s %s %s%s" % (Protocol.GAME_OVER, Server.WINNING_SCORE, ' '.join(client['name'] for client in winning_clients), Protocol.EOL))
+                client['socket'].sendall("%s %s %s%s" % (Protocol.GAME_OVER, Server.WINNING_SCORE, ' '.join(client['name'] for client in winning_clients), Protocol.EOL))
 
                 if client in winning_clients and 'verified' in client:
                     self.leaderboard.add_score(client['name'], datetime.datetime.now(), Server.WINNING_SCORE)
@@ -249,7 +249,7 @@ class Server(object):
         chat_clients = [client for client in clients if client['chat']]
 
         for chat_client in chat_clients:
-            chat_client['socket'].send("%s %s %s%s" % (Protocol.CHAT, sender['name'], " ".join(message), Protocol.EOL))
+            chat_client['socket'].sendall("%s %s %s%s" % (Protocol.CHAT, sender['name'], " ".join(message), Protocol.EOL))
 
     def challenge(self, challenger, *challenged_names):
         if not challenger['challenge']:
@@ -282,7 +282,7 @@ class Server(object):
         self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenger['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
         for challenged_client in challenged_clients:
             self.challenge_list[challenger['name']][challenged_client['name']] = False
-            challenged_client['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
+            challenged_client['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
             self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenged_client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
 
     def challenge_response(self, challenger, response):
@@ -319,34 +319,34 @@ class Server(object):
                     raise ClientError("Given argument `%s` cannot be converted to a valid date" % query)
 
                 score = self.leaderboard.best_score_of_date(date)
-                client['socket'].send("%s %s %s %s %s%s" % (Protocol.STATS, stat, query, score.name, score.score, Protocol.EOL))
+                client['socket'].sendall("%s %s %s %s %s%s" % (Protocol.STATS, stat, query, score.name, score.score, Protocol.EOL))
             elif stat == Protocol.STAT_PLAYER:
                 score = self.leaderboard.best_score_of_player(query)
-                client['socket'].send("%s %s %s %s%s" % (Protocol.STATS, stat, query, score.score, Protocol.EOL))
+                client['socket'].sendall("%s %s %s %s%s" % (Protocol.STATS, stat, query, score.score, Protocol.EOL))
             else:
                 raise ClientError("Given stat `%s` is not recognized, refer to protocol" % stat)
         except NoHighScoresError:
-            client['socket'].send("%s %s %s %s%s" % (Protocol.STATS, stat, query, Protocol.UNDEFINED, Protocol.EOL))
+            client['socket'].sendall("%s %s %s %s%s" % (Protocol.STATS, stat, query, Protocol.UNDEFINED, Protocol.EOL))
 
     def send_games(self, client):
         game_ids = [str(game) for game in self.network_games.keys()]
         if not game_ids:
             game_ids = [Protocol.UNDEFINED]
-        client['socket'].send("%s %s%s" % (ProtocolExtended.GAMES, Protocol.SEPARATOR.join(game_ids), Protocol.EOL))
+        client['socket'].sendall("%s %s%s" % (ProtocolExtended.GAMES, Protocol.SEPARATOR.join(game_ids), Protocol.EOL))
 
     def send_game_players(self, client, game_id):
         try:
             game_players = [player['name'] for player in self.network_games[int(game_id)]['clients']]
-            client['socket'].send("%s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, game_id, Protocol.SEPARATOR.join(game_players), Protocol.EOL))
+            client['socket'].sendall("%s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, game_id, Protocol.SEPARATOR.join(game_players), Protocol.EOL))
         except (ValueError, KeyError):
-            client['socket'].send("%s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, game_id, Protocol.UNDEFINED, Protocol.EOL))
+            client['socket'].sendall("%s %s %s%s" % (ProtocolExtended.GAME_PLAYERS, game_id, Protocol.UNDEFINED, Protocol.EOL))
 
     def send_game_board(self, client, game_id):
         try:
             board = self.network_games[int(game_id)]['game'].board
-            client['socket'].send("%s %s %s%s" % (ProtocolExtended.GAME_BOARD, game_id, board.encode(), Protocol.EOL))
+            client['socket'].sendall("%s %s %s%s" % (ProtocolExtended.GAME_BOARD, game_id, board.encode(), Protocol.EOL))
         except (ValueError, KeyError):
-            client['socket'].send("%s %s %s%s" % (ProtocolExtended.GAME_BOARD, game_id, Protocol.UNDEFINED, Protocol.EOL))
+            client['socket'].sendall("%s %s %s%s" % (ProtocolExtended.GAME_BOARD, game_id, Protocol.UNDEFINED, Protocol.EOL))
 
 class ServerError(Exception): pass
 class ClientError(Exception): pass
