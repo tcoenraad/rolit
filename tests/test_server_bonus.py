@@ -11,10 +11,10 @@ class TestServerBonus(TestServer):
         self.server.chat(self.clients[0], "This is a test message")
 
         args = call("%s %s %s%s" % (Protocol.CHAT, self.clients[0]['name'], "This is a test message", Protocol.EOL))
-        self.clients[0]['socket'].send.assert_has_calls(args)
-        self.clients[1]['socket'].send.assert_has_calls(args)
-        self.clients[2]['socket'].send.assert_has_calls(args)
-        assert self.clients[3]['socket'].send.call_count == 7
+        self.clients[0]['socket'].sendall.assert_has_calls(args)
+        self.clients[1]['socket'].sendall.assert_has_calls(args)
+        self.clients[2]['socket'].sendall.assert_has_calls(args)
+        assert self.clients[3]['socket'].sendall.call_count == 7
 
     def test_chat_when_enabled_and_in_game(self):
         self.start_game_with_two_players()
@@ -25,16 +25,16 @@ class TestServerBonus(TestServer):
 
         args = [call("%s %s %s%s" % (Protocol.CHAT, self.clients[0]['name'], "This is a test message and it is my turn", Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHAT, self.clients[1]['name'], "This is a test message and it is not my turn", Protocol.EOL))]
-        self.clients[0]['socket'].send.assert_has_calls(args)
-        self.clients[1]['socket'].send.assert_has_calls(args)
+        self.clients[0]['socket'].sendall.assert_has_calls(args)
+        self.clients[1]['socket'].sendall.assert_has_calls(args)
 
         args = call("%s %s %s%s" % (Protocol.CHAT, self.clients[2]['name'], "This is a test message and I am not in game", Protocol.EOL))
-        self.clients[2]['socket'].send.assert_has_calls(args)
+        self.clients[2]['socket'].sendall.assert_has_calls(args)
 
     def test_chat_with_disabled_clients(self):
         self.server.chat(self.clients[1], "This is a test message and I am not in game")
 
-        assert self.clients[3]['socket'].send.call_count == 7
+        assert self.clients[3]['socket'].sendall.call_count == 7
 
     def test_chat_when_disabled(self):
         with pytest.raises(ClientError):
@@ -84,9 +84,9 @@ class TestServerBonus(TestServer):
         self.server.challenge(self.clients[0], self.clients[1]['name'], self.clients[4]['name'])
 
         args = call("%s %s %s %s%s" % (Protocol.CHALLENGE, self.clients[0]['name'], self.clients[1]['name'], self.clients[4]['name'], Protocol.EOL))
-        self.clients[1]['socket'].send.assert_has_calls(args)
-        self.clients[4]['socket'].send.assert_has_calls(args)
-        assert self.clients[3]['socket'].send.call_count == 7
+        self.clients[1]['socket'].sendall.assert_has_calls(args)
+        self.clients[4]['socket'].sendall.assert_has_calls(args)
+        assert self.clients[3]['socket'].sendall.call_count == 7
 
     def test_challenge_response_when_not_challenged(self):
         with pytest.raises(ClientError):
@@ -104,19 +104,19 @@ class TestServerBonus(TestServer):
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL))]
-        self.clients[5]['socket'].send.assert_has_calls(args)
+        self.clients[5]['socket'].sendall.assert_has_calls(args)
 
     def test_availability_on_connect(self):
         self.server.challenge(self.clients[0], self.clients[1]['name'])
 
-        socket = Mock()
-        self.server.connect(socket, "Bestuur_35", Protocol.CHAT_AND_CHALLENGE)
+        sock = Mock()
+        self.server.connect(sock, "Bestuur_35", Protocol.CHAT_AND_CHALLENGE)
         args = [call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.FALSE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[4]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[5]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, "Bestuur_35", Protocol.TRUE, Protocol.EOL))]
-        socket.send.assert_has_calls(args)
+        sock.sendall.assert_has_calls(args)
 
     def test_challenge_request_accepted(self):
         self.server.initiate_game = Mock(wraps=self.server.initiate_game)
@@ -141,7 +141,7 @@ class TestServerBonus(TestServer):
 
         args = [call("%s %s %s%s" % (Protocol.CHALLENGE_RESPONSE, self.clients[1]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.CHALLENGE_RESPONSE, self.clients[4]['name'], Protocol.FALSE, Protocol.EOL))]
-        self.clients[0]['socket'].send.assert_has_calls(args)
-        self.clients[1]['socket'].send.assert_has_calls(args)
-        self.clients[4]['socket'].send.assert_has_calls(args)
-        assert self.clients[3]['socket'].send.call_count == 7
+        self.clients[0]['socket'].sendall.assert_has_calls(args)
+        self.clients[1]['socket'].sendall.assert_has_calls(args)
+        self.clients[4]['socket'].sendall.assert_has_calls(args)
+        assert self.clients[3]['socket'].sendall.call_count == 7

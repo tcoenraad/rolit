@@ -8,9 +8,9 @@ from test_server import TestServer
 class TestServerSetup(TestServer):
 
     def test_it_connects(self):
-        socket = Mock()
+        sock = Mock()
         self.server.create_game(self.clients[0])
-        self.server.connect(socket, "Bestuur_35", Protocol.CHAT_AND_CHALLENGE)
+        self.server.connect(sock, "Bestuur_35", Protocol.CHAT_AND_CHALLENGE)
 
         args = [call("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 1, Protocol.EOL)),
@@ -21,7 +21,7 @@ class TestServerSetup(TestServer):
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[4]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[5]['name'], Protocol.TRUE, Protocol.EOL)),
                 call("%s %s %s%s" % (Protocol.ONLINE, "Bestuur_35", Protocol.TRUE, Protocol.EOL))]
-        socket.send.assert_has_calls(args)
+        sock.sendall.assert_has_calls(args)
 
     def test_it_disconnects(self):
         self.server.lobbies = { self.clients[0]['name'] : [self.clients[0], self.clients[1], self.clients[2]] }
@@ -37,8 +37,8 @@ class TestServerSetup(TestServer):
                 call("%s %s %s%s" % (Protocol.ONLINE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 4, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.UNDEFINED, 4, Protocol.EOL))]
-        self.clients[5]['socket'].send.assert_has_calls(args)
-        assert self.clients[5]['socket'].send.call_count == 17
+        self.clients[5]['socket'].sendall.assert_has_calls(args)
+        assert self.clients[5]['socket'].sendall.call_count == 17
 
     def test_it_validates_name_is_unique(self):
         with pytest.raises(ServerError):

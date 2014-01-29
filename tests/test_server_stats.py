@@ -27,7 +27,7 @@ class TestServerStats(TestServer):
 
         args = [call("%s %s %s %s %s%s" % (Protocol.STATS, Protocol.STAT_DATE, str(time.strftime("%Y-%m-%d")), self.clients[0]['name'], '1', Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.STATS, Protocol.STAT_DATE, "2013-09-03", Protocol.UNDEFINED, Protocol.EOL))]
-        self.clients[0]['socket'].send.assert_has_calls(args)
+        self.clients[0]['socket'].sendall.assert_has_calls(args)
 
         with pytest.raises(ClientError):
             self.server.stats(self.clients[0], Protocol.STAT_DATE, "35")
@@ -48,4 +48,4 @@ class TestServerStats(TestServer):
         args = [call("%s %s %s %s%s" % (Protocol.STATS, Protocol.STAT_PLAYER, self.clients[0]['name'], '1', Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.STATS, Protocol.STAT_PLAYER, self.clients[1]['name'], '0', Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.STATS, Protocol.STAT_PLAYER, self.clients[2]['name'], Protocol.UNDEFINED, Protocol.EOL))]
-        self.clients[0]['socket'].send.assert_has_calls(args)
+        self.clients[0]['socket'].sendall.assert_has_calls(args)

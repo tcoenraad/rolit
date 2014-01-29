@@ -111,7 +111,7 @@ class TestServerGame(TestServer):
         self.server.disconnect(self.clients[1])
 
         args = "%s %s %s %s%s" % (Protocol.GAME_OVER, Server.WINNING_SCORE, self.clients[0]['name'], self.clients[1]['name'], Protocol.EOL)
-        self.clients[0]['socket'].send.assert_has_calls(call(args))
+        self.clients[0]['socket'].sendall.assert_has_calls(call(args))
 
     def test_it_starts_for_two_players(self):
         self.server.create_game(self.clients[0])
@@ -121,7 +121,7 @@ class TestServerGame(TestServer):
         args = [call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 1, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 2, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.STARTED, 2, Protocol.EOL))]
-        self.clients[2]['socket'].send.assert_has_calls(args)
+        self.clients[2]['socket'].sendall.assert_has_calls(args)
 
     def test_it_starts_for_three_players(self):
         self.server.create_game(self.clients[0])
@@ -133,7 +133,7 @@ class TestServerGame(TestServer):
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 2, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 3, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.STARTED, 3, Protocol.EOL))]
-        self.clients[3]['socket'].send.assert_has_calls(args)
+        self.clients[3]['socket'].sendall.assert_has_calls(args)
 
     def test_it_starts_for_four_players(self):
         self.server.create_game(self.clients[0])
@@ -147,7 +147,7 @@ class TestServerGame(TestServer):
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 3, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.NOT_STARTED, 4, Protocol.EOL)),
                 call("%s %s %s %s%s" % (Protocol.GAME, self.clients[0]['name'], Protocol.STARTED, 4, Protocol.EOL))]
-        self.clients[4]['socket'].send.assert_has_calls(args)
+        self.clients[4]['socket'].sendall.assert_has_calls(args)
 
     def test_it_moves_for_two_players(self):
         game = self.start_game_with_two_players()
@@ -160,11 +160,11 @@ class TestServerGame(TestServer):
             call("%s %s %s%s" % (Protocol.GAME_OVER, Server.WINNING_SCORE, self.clients[0]['name'], Protocol.EOL))]
 
         args.insert(1, call("%s%s" % (Protocol.MOVE, Protocol.EOL)))
-        self.clients[0]['socket'].send.assert_has_calls(args)
+        self.clients[0]['socket'].sendall.assert_has_calls(args)
 
         args.pop(1)
-        self.clients[1]['socket'].send.assert_has_calls(args)
-        assert self.clients[2]['socket'].send.call_count == 10
+        self.clients[1]['socket'].sendall.assert_has_calls(args)
+        assert self.clients[2]['socket'].sendall.call_count == 10
 
     def test_it_moves_for_three_players(self):
         game = self.start_game_with_three_players()
@@ -179,15 +179,15 @@ class TestServerGame(TestServer):
             call("%s %s %s%s" % (Protocol.GAME_OVER, Server.WINNING_SCORE, self.clients[1]['name'], Protocol.EOL))]
         
         args.insert(1, call("%s%s" % (Protocol.MOVE, Protocol.EOL)))
-        self.clients[0]['socket'].send.assert_has_calls(args)
+        self.clients[0]['socket'].sendall.assert_has_calls(args)
 
         args.pop(1)
         args.insert(2, call("%s%s" % (Protocol.MOVE, Protocol.EOL)))
-        self.clients[1]['socket'].send.assert_has_calls(args)
+        self.clients[1]['socket'].sendall.assert_has_calls(args)
 
         args.pop(2)
-        self.clients[2]['socket'].send.assert_has_calls(args)
-        assert self.clients[3]['socket'].send.call_count == 11
+        self.clients[2]['socket'].sendall.assert_has_calls(args)
+        assert self.clients[3]['socket'].sendall.call_count == 11
 
     def test_it_moves_for_four_players(self):
         game = self.start_game_with_four_players()
@@ -204,16 +204,16 @@ class TestServerGame(TestServer):
             call("%s %s %s%s" % (Protocol.GAME_OVER, Server.WINNING_SCORE, self.clients[2]['name'], Protocol.EOL))]
 
         args.insert(1, call("%s%s" % (Protocol.MOVE, Protocol.EOL)))
-        self.clients[0]['socket'].send.assert_has_calls(args)
+        self.clients[0]['socket'].sendall.assert_has_calls(args)
 
         args.pop(1)
         args.insert(2, call("%s%s" % (Protocol.MOVE, Protocol.EOL)))
-        self.clients[1]['socket'].send.assert_has_calls(args)
+        self.clients[1]['socket'].sendall.assert_has_calls(args)
 
         args.pop(2)
         args.insert(3, call("%s%s" % (Protocol.MOVE, Protocol.EOL)))
-        self.clients[2]['socket'].send.assert_has_calls(args)
+        self.clients[2]['socket'].sendall.assert_has_calls(args)
 
         args.pop(3)
-        self.clients[3]['socket'].send.assert_has_calls(args)
-        assert self.clients[4]['socket'].send.call_count == 16
+        self.clients[3]['socket'].sendall.assert_has_calls(args)
+        assert self.clients[4]['socket'].sendall.call_count == 16

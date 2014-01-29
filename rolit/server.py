@@ -187,7 +187,7 @@ class Server(object):
             client['game_id'] = game_id
             client['socket'].sendall("%s %s%s" % (Protocol.START, ' '.join(c['name'] for c in clients), Protocol.EOL))
 
-        clients[0]['socket'].send("%s%s" % (Protocol.MOVE, Protocol.EOL))
+        clients[0]['socket'].sendall("%s%s" % (Protocol.MOVE, Protocol.EOL))
 
         return game
 
@@ -211,13 +211,13 @@ class Server(object):
                 raise ClientError("Client is not current player of game, refer to protocol")
 
             for c in network_game['clients']:
-                c['socket'].send("%s %s %s %s%s" % (Protocol.MOVED, client['name'], x, y, Protocol.EOL))
+                c['socket'].sendall("%s %s %s %s%s" % (Protocol.MOVED, client['name'], x, y, Protocol.EOL))
             try:
                 network_game['game'].place(x, y)
             except BoardError:
                 raise ClientError("Given coordinate `%s` is not a valid move on the current board" % [x, y])
 
-            network_game['clients'][network_game['game'].current_player]['socket'].send("%s%s" % (Protocol.MOVE, Protocol.EOL))
+            network_game['clients'][network_game['game'].current_player]['socket'].sendall("%s%s" % (Protocol.MOVE, Protocol.EOL))
         except (ClientError, GameOverError) as e:
             self.game_over(network_game)
             if isinstance(e, ClientError):
@@ -292,7 +292,7 @@ class Server(object):
             if challenger['name'] in challengees:
                 for challengee in challengees:
                     if self.get_client(challengee):
-                        self.get_client(challengee)['socket'].send("%s %s %s%s" % (Protocol.CHALLENGE_RESPONSE, challenger['name'], response, Protocol.EOL))
+                        self.get_client(challengee)['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGE_RESPONSE, challenger['name'], response, Protocol.EOL))
 
                 if response == Protocol.TRUE:
                     challengees[challenger['name']] = True
