@@ -61,7 +61,8 @@ class Board(object):
             for direction in [-1, 1]:
                 fields = []
 
-                for shift in range(1, Board.DIM):
+                # bounce from edge to edge, please!
+                for shift in range(1, Board.DIM + 2):
                     x_coord = x
                     y_coord = y
 
