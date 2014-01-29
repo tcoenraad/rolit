@@ -57,8 +57,8 @@ class Server(object):
 
         client = { 'socket' : socket,
                    'name' : name,
-                   'chat' : supported == Protocol.CHAT or supported == Protocol.CHAT_AND_CHALLENGE,
-                   'challenge' : supported == Protocol.CHALLENGE or supported == Protocol.CHAT_AND_CHALLENGE }
+                   'chat' : supported == Protocol.CHAT_ENABLED or supported == Protocol.CHAT_AND_CHALLENGE,
+                   'challenge' : supported == Protocol.CHALLENGE_ENABLED or supported == Protocol.CHAT_AND_CHALLENGE }
 
         # authenticate
         if name.startswith(Protocol.AUTH_PREFIX):
