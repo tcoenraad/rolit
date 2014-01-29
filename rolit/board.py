@@ -48,7 +48,9 @@ class Board(object):
     def any_forced_moves_left(self, color):
         for x in range(Board.DIM):
             for y in range(Board.DIM):
-                if len(self.direct_adjacent_colors(x, y)) == 0:
+                if not self.field(x, y) == Ball(Ball.EMPTY):
+                    continue
+                elif len(self.direct_adjacent_colors(x, y)) == 0:
                     continue
                 elif len(self.filtered_adjacent_fields(x, y, color)) > 0:
                     return True
@@ -80,8 +82,8 @@ class Board(object):
                     field = self.field(x_coord, y_coord)
 
                     # stop walking a direction if field is:
-                        # your own color (then return all results till than)
-                        # or empty (then clear the found fields as you did not find your own color)
+                        # empty (then clear the found fields as you did not find your own color)
+                        # or your own color (then return all results till than)
                     if not field or field == Ball(Ball.EMPTY):
                         fields = []
                         break

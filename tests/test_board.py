@@ -96,7 +96,7 @@ class TestBoard():
         self.board.place(7, 6, Ball.GREEN)
         assert self.board.field(7, 7) == Ball(Ball.RED)
 
-    def test_an_edge_flip(self):
+    def test_an_edge_line(self):
         self.board.place(5, 5, Ball.RED)
         self.board.place(6, 6, Ball.GREEN)
         self.board.place(7, 7, Ball.RED)
@@ -111,6 +111,10 @@ class TestBoard():
         self.board.place(7, 0, Ball.GREEN)
         assert self.board.field(7, 7) == Ball(Ball.RED)
 
+        self.board.place(5, 3, Ball.RED)
+        self.board.place(6, 0, Ball.GREEN)
+        assert self.board.field(6, 0) == Ball(Ball.GREEN)
+
     def test_it_encodes(self):
         assert self.board.encode() == "empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty red yellow empty empty empty empty empty empty blue green empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty"
 
@@ -120,4 +124,3 @@ class TestBoard():
         assert board.field(3, 4) == Ball(Ball.BLUE)
         assert board.field(4, 3) == Ball(Ball.YELLOW)
         assert board.field(4, 4) == Ball(Ball.GREEN)
-
