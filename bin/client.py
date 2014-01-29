@@ -18,6 +18,7 @@ class ServerHandler(threading.Thread):
     def run(self):
         while True:
             response = self.client.socket.recv(4096)
+            # wait for Protocol.EOL
             if not response:
                 break
 

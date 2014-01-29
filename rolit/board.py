@@ -45,7 +45,7 @@ class Board(object):
     def direct_adjacent_colors(self, x, y):
         return filter((lambda x: x != Ball(Ball.EMPTY)), self.direct_adjacent_fields(x, y))
 
-    def any_forced_moves_left(self, color):
+    def any_forced_move(self, color):
         for x in range(Board.DIM):
             for y in range(Board.DIM):
                 if not self.field(x, y) == Ball(Ball.EMPTY):
@@ -53,7 +53,7 @@ class Board(object):
                 elif len(self.direct_adjacent_colors(x, y)) == 0:
                     continue
                 elif len(self.filtered_adjacent_fields(x, y, color)) > 0:
-                    return True
+                    return (x, y)
         return False
 
     def filtered_adjacent_fields(self, x, y, color):
@@ -103,8 +103,9 @@ class Board(object):
             raise NotAdjacentError('Field is not directly adjacent to any field')
 
         filtered_adjacent_fields = self.filtered_adjacent_fields(x, y, color)
-        if len(filtered_adjacent_fields) == 0 and self.any_forced_moves_left(color):
-            raise ForcedMoveError('This move is not forced, while forced moves are left')
+        any_forced_move = self.any_forced_move(color)
+        if len(filtered_adjacent_fields) == 0 and any_forced_move:
+            raise ForcedMoveError('This move is not forced, while forced moves are left, like `x=%s, y=%s`' % any_forced_move)
 
         for field in filtered_adjacent_fields:
             field.recolor(color)
