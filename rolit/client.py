@@ -49,10 +49,10 @@ class Client(object):
                 print("You may now enter a coord!")
                 print("[x] <xy> (autofire once with [a], enable auto_fire with [xa], disable with [xm])")
 
-        def moved(self, coord):
-            x = int(coord[0])
-            y = int(coord[1])
-            Helpers.notice("A move is done at x=%s, y=%s" % (x, y))
+        def moved(self, move):
+            x = int(move[1])
+            y = int(move[2])
+            Helpers.notice("A move is done by %s at x=%s, y=%s" % (move[0], x, y))
             try:
                 self.client.game.place(x, y)
             except GameOverError:
@@ -82,7 +82,7 @@ class Client(object):
             Helpers.notice("Connected established")
             Helpers.notice("Chat = %s and challenge = %s" % (options[0] == Protocol.CHAT_ENABLED or options[0] == Protocol.CHAT_AND_CHALLENGE, options[0] == Protocol.CHALLENGE_ENABLED or options[0] == Protocol.CHAT_AND_CHALLENGE))
 
-            if len(options) >= 2:
+            if len(options) >= 3:
                 signature = b64encode(Helpers.sign_data(self.client.private_key, options[2]))
                 self.client.socket.sendall("%s %s%s" % (Protocol.AUTH, signature, Protocol.EOL))
 
