@@ -80,7 +80,7 @@ class Client(object):
 
         def handshake(self, options):
             Helpers.notice("Connected established")
-            Helpers.notice("Chat = %s and challenge = %s" % (options[0] == Protocol.CHAT or options[0] == Protocol.CHAT_AND_CHALLENGE, options[0] == Protocol.CHALLENGE or options[0] == Protocol.CHAT_AND_CHALLENGE))
+            Helpers.notice("Chat = %s and challenge = %s" % (options[0] == Protocol.CHAT_ENABLED or options[0] == Protocol.CHAT_AND_CHALLENGE, options[0] == Protocol.CHALLENGE_ENABLED or options[0] == Protocol.CHAT_AND_CHALLENGE))
 
             if len(options) >= 2:
                 signature = b64encode(Helpers.sign_data(self.client.private_key, options[2]))

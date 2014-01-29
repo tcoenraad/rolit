@@ -11,9 +11,9 @@ class TestServer(object):
 
         self.mocked_clients = [{ 'socket' : Mock(), 'name' : "Met_TOM_op_de_koffie!", 'supported' : Protocol.CHAT_AND_CHALLENGE },
                                { 'socket' : Mock(), 'name' : "Yorinf",                'supported' : Protocol.CHAT_AND_CHALLENGE },
-                               { 'socket' : Mock(), 'name' : "Tegel_14",              'supported' : Protocol.CHAT },
+                               { 'socket' : Mock(), 'name' : "Tegel_14",              'supported' : Protocol.CHAT_ENABLED },
                                { 'socket' : Mock(), 'name' : "Lalala_geld",           'supported' : Protocol.BAREBONE },
-                               { 'socket' : Mock(), 'name' : "IEOEDMB",               'supported' : Protocol.CHALLENGE },
+                               { 'socket' : Mock(), 'name' : "IEOEDMB",               'supported' : Protocol.CHALLENGE_ENABLED },
                                { 'socket' : Mock(), 'name' : "Inter-Actief",          'supported' : Protocol.CHAT_AND_CHALLENGE }]
 
         self.clients = []
