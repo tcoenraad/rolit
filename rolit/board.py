@@ -78,16 +78,13 @@ class Board(object):
 
                     field = self.field(x_coord, y_coord)
 
-                    if not field:
-                        break
-
                     # stop walking a direction if field is:
                         # your own color (then return all results till than)
                         # or empty (then clear the found fields as you did not find your own color)
-                    if field == Ball(color):
-                        break
-                    elif field == Ball(Ball.EMPTY):
+                    if not field or field == Ball(Ball.EMPTY):
                         fields = []
+                        break
+                    elif field == Ball(color):
                         break
                     else:
                         fields.append(field)

@@ -87,6 +87,15 @@ class TestBoard():
         self.board.place(5, 3, Ball.RED)
         self.board.place(2, 2, Ball.YELLOW)
 
+    def test_an_edge_case(self):
+        self.board.place(5, 5, Ball.RED)
+        self.board.place(6, 6, Ball.GREEN)
+        self.board.place(7, 7, Ball.RED)
+        assert self.board.field(7, 7) == Ball(Ball.RED)
+
+        self.board.place(7, 6, Ball.GREEN)
+        assert self.board.field(7, 7) == Ball(Ball.RED)
+
     def test_it_encodes(self):
         assert self.board.encode() == "empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty red yellow empty empty empty empty empty empty blue green empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty empty"
 
