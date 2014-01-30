@@ -32,19 +32,7 @@ class Helpers(object):
                 self.whatsapp = whatsappy.Client(number=config.get('whatsapp', 'phone'), secret=b64decode(config.get('whatsapp', 'secret')))
                 self.whatsapp.login()
 
-                self.timer = Timer(self.whatsapp.PING_INTERVAL, self._ping, ())
-                self.timer.daemon = True
-                self.timer.start()
-
                 Helpers.error_and_whatsapp("WhatsApp connection established for `%s`" % socket.gethostname())
-
-        def _ping(self):
-            try:
-                self.whatsapp._ping()
-            except IOError:
-                del self.whatsapp
-                self.timer.cancel()
-                Helpers.error_and_whatsapp("Connection lost to WhatsApp while pinging!")
 
         def send(self, message):
             if self.whatsapp:
