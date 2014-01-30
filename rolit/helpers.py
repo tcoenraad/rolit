@@ -40,7 +40,6 @@ class Helpers(object):
                     self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
                 except IOError:
                     del self.whatsapp
-                    self.timer.cancel()
                     Helpers.error_and_whatsapp("Connection lost to WhatsApp while sending `%s`!" % message)
 
     def whatsapp(func):
