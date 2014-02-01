@@ -13,7 +13,7 @@ class Protocol(object):
     ONLINE                  = 'online'
     CHALLENGE               = 'challenge'
     CHALLENGE_RESPONSE      = 'challengeResponse'
-    CHALLENGE_AVAILABLE     = 'canBeChallenged'
+    CHALLENGABLE            = 'canBeChallenged'
 
     STATS        = 'highscore'
     STAT_DATE    = 'date'

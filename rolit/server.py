@@ -81,9 +81,9 @@ class Server(object):
             challengees = self.get_clients_in_challenges()
             for c in self.clients:
                 if c['challenge']:
-                    client['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, c['name'], Protocol.FALSE if c['name'] in challengees else Protocol.TRUE, Protocol.EOL))
-            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL), 'challenge')
-            client['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, name, Protocol.TRUE, Protocol.EOL))
+                    client['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGABLE, c['name'], Protocol.FALSE if c['name'] in challengees else Protocol.TRUE, Protocol.EOL))
+            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGABLE, name, Protocol.TRUE, Protocol.EOL), 'challenge')
+            client['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGABLE, name, Protocol.TRUE, Protocol.EOL))
 
         self.clients.append(client)
         return client
@@ -102,7 +102,7 @@ class Server(object):
         if client['challenge']:
             try:
                 self.challenge_response(client, Protocol.FALSE)
-                self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
+                self.broadcast("%s %s %s%s" % (Protocol.CHALLENGABLE, client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
             except ClientError:
                 pass
 
@@ -279,11 +279,11 @@ class Server(object):
             raise ClientError("You challenged someone who already is in challenge")
 
         self.challenge_list[challenger['name']] = { challenger['name'] : True }
-        self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenger['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
+        self.broadcast("%s %s %s%s" % (Protocol.CHALLENGABLE, challenger['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
         for challenged_client in challenged_clients:
             self.challenge_list[challenger['name']][challenged_client['name']] = False
             challenged_client['socket'].sendall("%s %s %s%s" % (Protocol.CHALLENGE, challenger['name'], Protocol.SEPARATOR.join(challenged_names), Protocol.EOL))
-            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challenged_client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
+            self.broadcast("%s %s %s%s" % (Protocol.CHALLENGABLE, challenged_client['name'], Protocol.FALSE, Protocol.EOL), 'challenge')
 
     def challenge_response(self, challenger, response):
         response = Protocol.TRUE if response == Protocol.TRUE else Protocol.FALSE
@@ -304,7 +304,7 @@ class Server(object):
     def remove_challenge(self, challenger):
         for challengee in self.challenge_list[challenger]:
             if self.get_client(challengee):
-                self.broadcast("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, challengee, Protocol.TRUE, Protocol.EOL), 'challenge')
+                self.broadcast("%s %s %s%s" % (Protocol.CHALLENGABLE, challengee, Protocol.TRUE, Protocol.EOL), 'challenge')
         del(self.challenge_list[challenger])
 
     def stats(self, client, stat, query):

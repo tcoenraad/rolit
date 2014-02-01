@@ -96,14 +96,14 @@ class TestServerBonus(TestServer):
         self.server.challenge(self.clients[0], self.clients[1]['name'])
         self.server.disconnect(self.clients[1])
 
-        args = [call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.TRUE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[4]['name'], Protocol.TRUE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[5]['name'], Protocol.TRUE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.FALSE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL))]
+        args = [call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[1]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[4]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[5]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[0]['name'], Protocol.FALSE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[0]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL))]
         self.clients[5]['socket'].sendall.assert_has_calls(args)
 
     def test_availability_on_connect(self):
@@ -111,11 +111,11 @@ class TestServerBonus(TestServer):
 
         sock = Mock()
         self.server.connect(sock, "Bestuur_35", Protocol.CHAT_AND_CHALLENGE)
-        args = [call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[0]['name'], Protocol.FALSE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[4]['name'], Protocol.TRUE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, self.clients[5]['name'], Protocol.TRUE, Protocol.EOL)),
-                call("%s %s %s%s" % (Protocol.CHALLENGE_AVAILABLE, "Bestuur_35", Protocol.TRUE, Protocol.EOL))]
+        args = [call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[0]['name'], Protocol.FALSE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[1]['name'], Protocol.FALSE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[4]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, self.clients[5]['name'], Protocol.TRUE, Protocol.EOL)),
+                call("%s %s %s%s" % (Protocol.CHALLENGABLE, "Bestuur_35", Protocol.TRUE, Protocol.EOL))]
         sock.sendall.assert_has_calls(args)
 
     def test_challenge_request_accepted(self):
