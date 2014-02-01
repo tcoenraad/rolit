@@ -60,7 +60,7 @@ class ClientHandler(threading.Thread):
         except IOError as e:
             Helpers.error_and_whatsapp('Connection error `%s` with %s' % (e, self.name))
         finally:
-            Helpers.log_and_whatsapp('Connection lost with %s' % self.name)
+            Helpers.log_and_whatsapp('Connection lost to %s' % self.name)
             self.socket.close()
 
             if hasattr(self, 'client'):
