@@ -14,6 +14,7 @@ class Client(object):
     class Router(object):
 
         routes = { Protocol.ONLINE : { 'method' : 'online' },
+                   Protocol.CHALLENGABLE : { 'method' : 'challengable'},
                    Protocol.HANDSHAKE : { 'method' : 'handshake' },
                    Protocol.AUTH_OK : { 'method' : 'auth' },
                    Protocol.GAME : { 'method' : 'game' },
@@ -30,17 +31,20 @@ class Client(object):
             self.client = client
 
         @staticmethod
-        def online(status):
-            Helpers.notice("[online] `%s`: %s" %(status[0], status[1] == Protocol.TRUE))
+        def online(name, status):
+            Helpers.notice("[online] `%s`: %s" % (name, status == Protocol.TRUE))
+
+        @staticmethod
+        def challengable(name, status):
+            Helpers.notice("[challengable] `%s`: %s" % (name, status == Protocol.TRUE))
 
         @staticmethod
         def error(message):
-            print("Oops, that is an error!")
-            print("`%s`" % message)
+            print("Oops, that is an error: `%s`" % message)
 
         @staticmethod
-        def game(status):
-            Helpers.notice("[game_update] `%s`, with `%s` players has status: %s" %(status[0], status[2], status[1]))
+        def game(name, status, number_of_players):
+            Helpers.notice("[game_update] `%s`, with `%s` players has status: %s" % (name, number_of_players, status))
 
         def move(self):
             if self.client.auto_fire:
@@ -49,10 +53,10 @@ class Client(object):
                 print("You may now enter a coord!")
                 print("[x] <xy> (autofire once with [a], enable auto_fire with [xa], disable with [xm])")
 
-        def moved(self, move):
-            x = int(move[1])
-            y = int(move[2])
-            Helpers.notice("A move is done by %s at x=%s, y=%s" % (move[0], x, y))
+        def moved(self, name, x, y):
+            x = int(x)
+            y = int(y)
+            Helpers.notice("A move is done by %s at x=%s, y=%s" % (name, x, y))
             try:
                 self.client.game.place(x, y)
             except GameOverError:
@@ -62,13 +66,13 @@ class Client(object):
 
             print(self.client.game.board)
 
-        def game_over(self, players):
+        def game_over(self, score, *players):
             Helpers.notice("Game is over!")
-            print("Winners were: %s" % players)
+            print("Score was: %s, for winners: %s" % (score, list(players)))
 
-        def start(self, players):
+        def start(self, *players):
             Helpers.notice("A game has started!")
-            print("Players are: %s" % players)
+            print("Players are: %s" % list(players))
             number_of_players = len(players)
             if number_of_players == 2:
                 self.client.game = TwoPlayerGame()
@@ -78,7 +82,7 @@ class Client(object):
                 self.client.game = FourPlayerGame()
             print(self.client.game.board)
 
-        def handshake(self, options):
+        def handshake(self, *options):
             Helpers.notice("Connected established")
             Helpers.notice("Chat = %s and challenge = %s" % (options[0] == Protocol.CHAT_ENABLED or options[0] == Protocol.CHAT_AND_CHALLENGE, options[0] == Protocol.CHALLENGE_ENABLED or options[0] == Protocol.CHAT_AND_CHALLENGE))
 
@@ -96,25 +100,25 @@ class Client(object):
             print(games)
 
         @staticmethod
-        def game_players(players):
+        def game_players(*players):
             print("The following players are in game `%s` active:" % players[0])
             print(players[1:])
 
         @staticmethod
-        def game_board(board):
-            print("The board for game `%s` looks like:" % board[0])
-            if not board[1] == Protocol.UNDEFINED:
-                print(Board.decode(Protocol.SEPARATOR.join(board[1:])))
+        def game_board(game_id, *board):
+            print("The board for game `%s` looks like:" % game_id)
+            if not board[0] == Protocol.UNDEFINED:
+                print(Board.decode(Protocol.SEPARATOR.join(board[0:])))
 
         @staticmethod
-        def stats(options):
-            if options[0] == Protocol.STAT_DATE:
-                print("The following player was at date `%s` best player:" % options[1])
-                print(options[2:])
+        def stats(stat, arg, *result):
+            if stat == Protocol.STAT_DATE:
+                print("The following player was at date `%s` best player:" % arg)
+                print(result)
             
-            elif options[0] == Protocol.STAT_PLAYER:
-                print("The following score was best of player `%s` best player:" % options[1])
-                print(options[2:])
+            elif stat == Protocol.STAT_PLAYER:
+                print("The following score was best of player `%s` best player:" % arg)
+                print(result)
 
     options = { 'h' : { 'method': 'menu', 'args': 0, 'description': "Show this help menu" },
                 '1' : { 'method': 'create_game', 'args': 0, 'description': "Create a game" },

@@ -30,7 +30,7 @@ class ServerHandler(threading.Thread):
                     if len(data) == 1:
                         getattr(self.client.router, Client.Router.routes[data[0]]['method'])()
                     else:
-                        getattr(self.client.router, Client.Router.routes[data[0]]['method'])(data[1:])
+                        getattr(self.client.router, Client.Router.routes[data[0]]['method'])(*data[1:])
                 except KeyError:
                     self.client.Router.error(line)
 
