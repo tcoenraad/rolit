@@ -26,7 +26,7 @@ Run server:
 
 Run client:
 
-    $ python bin/client.py [host = localhost [port = 3535 [player_name = Monitor_[0-3535] [private_key_file]]]]
+    $ python bin/client.py [host = localhost [port = 3535 [player_name = Monitor_[0-3535] [private_key_file=./private_key]]]]
     
 Run tests:
 
