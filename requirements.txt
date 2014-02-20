@@ -5,3 +5,4 @@ pytest-xdist
 mock
 pycrypto
 pbkdf2
+ConfigParser
