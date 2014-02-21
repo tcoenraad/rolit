@@ -8,6 +8,14 @@ from rolit.board import Board, BoardError
 from rolit.helpers import Helpers
 from rolit.protocol import Protocol
 from rolit.protocol_extended import ProtocolExtended
+from rolit.server import Server
+
+class NoPrivateKeyError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 class Client(object):
 
@@ -135,10 +143,11 @@ class Client(object):
                 'a' : { 'method': 'ai', 'args': 0, 'hidden': True }
                }
 
-    def __init__(self, socket, private_key):
+    def __init__(self, socket, name, private_key=None):
         self.socket = socket
         self.auto_fire = False
         self.router = Client.Router(self)
+        self.name = name
         self.private_key = private_key
 
     @staticmethod
@@ -150,6 +159,12 @@ class Client(object):
                 continue
             print("%s|%s" % (key, value['description']))
         Helpers.notice('-' * 16)
+
+    def handshake(self):
+        if self.name.startswith('player_') and not self.private_key:
+            raise NoPrivateKeyError("When a playername with player_ is given, a private key is expected")
+
+        self.socket.sendall("%s %s %s %s%s" % (Protocol.HANDSHAKE, self.name, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
 
     def get_games(self):
         self.socket.sendall("%s%s" % (ProtocolExtended.GAMES, Protocol.EOL))
