@@ -5,7 +5,7 @@ from rolit.ball import Ball
 
 import pytest
 
-class TestGame():
+class TestGame(object):
 
     def test_it_gives_right_winners_for_two_player_games(self):
         two_player_game = TwoPlayerGame()
