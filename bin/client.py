@@ -4,7 +4,7 @@ import sys
 import threading
 import random
 
-from rolit.client import Client
+from rolit.client import Client, NoPrivateKeyError
 from rolit.server import Server
 from rolit.protocol import Protocol
 from rolit.helpers import Helpers
@@ -54,10 +54,8 @@ def main():
 
     try:
         private_key = open(private_key_file, "r").read()
-    except IOError as e:
-        print(e)
-        Helpers.error("Cannot open private key file")
-        return
+    except IOError:
+        private_key = None
 
     client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM), private_key)
     client.socket.connect((host, port))
@@ -66,7 +64,12 @@ def main():
     thread.daemon = True
     thread.start()
 
-    client.socket.sendall("%s %s %s %s%s" % (Protocol.HANDSHAKE, name, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
+    try:
+        client.handshake(name)
+    except NoPrivateKeyError as e:
+        Helpers.error(e)
+        return
+
     print("Welcome to the Rolit monitor, %s!" % name)
     Client.menu()
 
