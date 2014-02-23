@@ -17,7 +17,7 @@ class ClientHandler(threading.Thread):
 
     def run(self):
         try:
-            line_reader = Helpers.readlines(self.socket)
+            line_reader = Helpers.read_lines(self.socket)
             line = next(line_reader).strip()
 
             Helpers.log("`%s`: `%s`" % (self.name, line))

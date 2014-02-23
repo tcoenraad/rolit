@@ -5,7 +5,6 @@ import threading
 import random
 
 from rolit.client import Client, NoPrivateKeyError
-from rolit.server import Server
 from rolit.protocol import Protocol
 from rolit.helpers import Helpers
 

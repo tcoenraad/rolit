@@ -1,9 +1,5 @@
-from threading import Timer
 import time
 import socket
-import sys
-
-import ConfigParser
 
 from termcolor import colored
 from rolit.protocol import Protocol
@@ -28,15 +24,15 @@ class Helpers(object):
         print(colored(message, 'red'))
 
     @staticmethod
-    def readlines(sock):
-        buffer = ''
+    def read_lines(sock):
+        read_buffer = ''
         data = True
         while data:
             data = sock.recv(4096)
-            buffer += data
+            read_buffer += data
 
-            while not buffer.find(Protocol.EOL) == -1:
-                line, buffer = buffer.split(Protocol.EOL, 1)
+            while not read_buffer.find(Protocol.EOL) == -1:
+                line, read_buffer = read_buffer.split(Protocol.EOL, 1)
                 yield line
         return
 
