@@ -10,80 +10,22 @@ from rolit.protocol import Protocol
 
 class Helpers(object):
 
-    class WhatsApp(object):
-
-        __shared_state = {}
-        def __init__(self):
-            self.__dict__ = self.__shared_state
-
-            if not hasattr(self, 'whatsapp'):
-                config = ConfigParser.ConfigParser()
-                config.read('config')
-                if not config.has_option('whatsapp', 'phone'):
-                    self.whatsapp = None
-                    return
-
-                self.config = config
-
-                sys.path.append('./lib/python_whatsapp')
-                import whatsappy
-                from base64 import b64decode
-
-                self.whatsapp = whatsappy.Client(number=config.get('whatsapp', 'phone'), secret=b64decode(config.get('whatsapp', 'secret')))
-                self.whatsapp.login()
-
-                Helpers.error_and_whatsapp("WhatsApp connection established for `%s`" % socket.gethostname())
-
-        def send(self, message):
-            if self.whatsapp:
-                try:
-                    self.whatsapp.group_message(self.config.get('whatsapp', 'group_id'), message)
-                except IOError:
-                    del self.whatsapp
-                    Helpers.error_and_whatsapp("Connection lost to WhatsApp while sending `%s`!" % message)
-
-    def whatsapp(func):
-        def inner(*args, **kwargs):
-            Helpers.WhatsApp().send(args[0])
-            return func(*args, **kwargs)
-        return inner
-
     @staticmethod
     def log(message):
         message = "[%s] %s" % (time.strftime("%H:%M:%S"), message)
         print(message)
 
     @staticmethod
-    @whatsapp
-    def log_and_whatsapp(message):
-        Helpers.log(message)
-
-    @staticmethod
     def notice(message):
         print(colored(message, 'blue'))
-
-    @staticmethod
-    @whatsapp
-    def notice_and_whatsapp(message):
-        Helpers.notice(message)
 
     @staticmethod
     def warning(message):
         print(colored(message, 'yellow'))
 
     @staticmethod
-    @whatsapp
-    def warning_and_whatsapp(message):
-        Helpers.log(message)
-
-    @staticmethod
     def error(message):
         print(colored(message, 'red'))
-
-    @staticmethod
-    @whatsapp
-    def error_and_whatsapp(message):
-        Helpers.log(message)
 
     @staticmethod
     def sign_data(private_key, data):
