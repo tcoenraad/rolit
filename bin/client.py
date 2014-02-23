@@ -54,10 +54,10 @@ def main():
 
     try:
         private_key = open(private_key_file, "r").read()
-    except IOError as e:
+    except IOError:
         private_key = None
 
-    client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM), name, private_key)
+    client = Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM), private_key)
     client.socket.connect((host, port))
 
     thread = ServerHandler(client)
@@ -65,7 +65,7 @@ def main():
     thread.start()
 
     try:
-        client.handshake()
+        client.handshake(name)
     except NoPrivateKeyError as e:
         Helpers.error(e)
         return
