@@ -13,6 +13,7 @@ from rolit.leaderboard import Leaderboard, NoHighScoresError
 
 class Server(object):
 
+    SUPPORTS = Protocol.CHAT_AND_CHALLENGE
     VERSION = 35
     WINNING_SCORE = 1
     LOSING_SCORE = 0
@@ -63,9 +64,9 @@ class Server(object):
         # authenticate
         if name.startswith(Protocol.AUTH_PREFIX):
             client['nonce'] = hashlib.sha512(str(random.random())).hexdigest()
-            client['socket'].sendall("%s %s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, client['nonce'], Protocol.EOL))
+            client['socket'].sendall("%s %s %s %s%s" % (Protocol.HANDSHAKE, Server.SUPPORTS, Server.VERSION, client['nonce'], Protocol.EOL))
         else:
-            client['socket'].sendall("%s %s %s%s" % (Protocol.HANDSHAKE, Protocol.CHAT_AND_CHALLENGE, Server.VERSION, Protocol.EOL))
+            client['socket'].sendall("%s %s %s%s" % (Protocol.HANDSHAKE, Server.SUPPORTS, Server.VERSION, Protocol.EOL))
 
         for (lobby, clients) in self.lobbies.items():
             client['socket'].sendall("%s %s %s %s%s" % (Protocol.GAME, lobby, Protocol.NOT_STARTED, len(clients), Protocol.EOL))

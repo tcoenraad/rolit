@@ -17,7 +17,8 @@ class ClientHandler(threading.Thread):
 
     def run(self):
         try:
-            line = self.socket.recv(4096).strip()
+            line_reader = Helpers.readlines(self.socket)
+            line = next(line_reader).strip()
 
             Helpers.log("`%s`: `%s`" % (self.name, line))
 
@@ -36,7 +37,7 @@ class ClientHandler(threading.Thread):
             Helpers.notice('Client %s introduced itself as `%s`' % (self.client_address, self.name))
 
             while True:
-                line = self.socket.recv(4096).strip()
+                line = next(line_reader).strip()
                 if not line:
                     break
 
@@ -49,15 +50,17 @@ class ClientHandler(threading.Thread):
                         getattr(self.server, route['method'])(self.client, *data[1:])
                     else:
                         getattr(self.server, route['method'])(self.client)
-                except (KeyError, TypeError):
+                except (KeyError):
                     raise ClientError('Invalid command `%s`, refer to protocol' % line)
+                except(TypeError):
+                    raise ClientError('Invalid arguments `%s`, refer to protocol' % line)
         except ServerError as e:
             Helpers.error('500 Internal Server Error: `%s`' % e)
             self.socket.sendall('%s 500 Internal Server Error: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except ClientError as e:
             Helpers.error('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
             self.socket.sendall('%s 400 Bad Request: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
-        except IOError as e:
+        except (IOError, StopIteration) as e:
             Helpers.error('Connection error `%s` with %s' % (e, self.name))
         finally:
             Helpers.log('Connection lost to %s' % self.name)

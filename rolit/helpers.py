@@ -28,6 +28,19 @@ class Helpers(object):
         print(colored(message, 'red'))
 
     @staticmethod
+    def readlines(sock):
+        buffer = ''
+        data = True
+        while data:
+            data = sock.recv(4096)
+            buffer += data
+
+            while not buffer.find(Protocol.EOL) == -1:
+                line, buffer = buffer.split(Protocol.EOL, 1)
+                yield line
+        return
+
+    @staticmethod
     def sign_data(private_key, data):
 
         from Crypto.PublicKey import RSA
