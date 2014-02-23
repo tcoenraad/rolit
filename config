@@ -1,7 +1,2 @@
 [server]
 port = 3535 ; 1024 - 65535
-
-[whatsapp]
-# phone = ; phone number, international format, without any + or 00 prefix
-# secret = ; secret base64 encoded
-# group_id = ; group identifier

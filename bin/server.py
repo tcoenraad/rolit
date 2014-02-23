@@ -33,7 +33,7 @@ class ClientHandler(threading.Thread):
                 self.client = self.server.connect(self.socket, data[1], data[2])
 
             self.name = self.client['name']
-            Helpers.notice_and_whatsapp('Client %s introduced itself as `%s`' % (self.client_address, self.name))
+            Helpers.notice('Client %s introduced itself as `%s`' % (self.client_address, self.name))
 
             while True:
                 line = self.socket.recv(4096).strip()
@@ -52,15 +52,15 @@ class ClientHandler(threading.Thread):
                 except (KeyError, TypeError):
                     raise ClientError('Invalid command `%s`, refer to protocol' % line)
         except ServerError as e:
-            Helpers.error_and_whatsapp('500 Internal Server Error: `%s`' % e)
+            Helpers.error('500 Internal Server Error: `%s`' % e)
             self.socket.sendall('%s 500 Internal Server Error: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except ClientError as e:
-            Helpers.error_and_whatsapp('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
+            Helpers.error('Client `%s` made a 400 Bad Request: `%s`' % (self.name, e))
             self.socket.sendall('%s 400 Bad Request: `%s`%s' % (Protocol.ERROR, e, Protocol.EOL))
         except IOError as e:
-            Helpers.error_and_whatsapp('Connection error `%s` with %s' % (e, self.name))
+            Helpers.error('Connection error `%s` with %s' % (e, self.name))
         finally:
-            Helpers.log_and_whatsapp('Connection lost to %s' % self.name)
+            Helpers.log('Connection lost to %s' % self.name)
             self.socket.close()
 
             if hasattr(self, 'client'):
@@ -81,11 +81,11 @@ def main():
 
     server = Server()
 
-    Helpers.log_and_whatsapp('A Rolit server has started for `%s` on port %s' % (socket.gethostname(), port))
+    Helpers.log('A Rolit server has started for `%s` on port %s' % (socket.gethostname(), port))
 
     while True:
         conn, client_address = sock.accept()
-        Helpers.log_and_whatsapp('Connection established with %s' % str(client_address))
+        Helpers.log('Connection established with %s' % str(client_address))
         thread = ClientHandler(server, conn, client_address)
         thread.daemon = True
         thread.start()
